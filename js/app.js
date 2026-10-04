@@ -206,7 +206,51 @@ function overallStats() {
 
 /* ---------- Routing (hash-based, proste SPA) ---------- */
 window.addEventListener('hashchange', route);
-window.addEventListener('DOMContentLoaded', () => { route(); registerSW(); renderInstallBanner(); });
+window.addEventListener('DOMContentLoaded', () => {
+  route();
+  registerSW();
+  renderInstallBanner();
+  runBootSequence();
+});
+
+/* ---------- Sekwencja startowa (jednorazowo, przy pierwszym wejściu) ---------- */
+const BOOT_SEEN_KEY = 'tuxlab_boot_seen';
+function runBootSequence() {
+  const overlay = document.getElementById('boot-overlay');
+  if (!overlay) return;
+  let seen = false;
+  try { seen = localStorage.getItem(BOOT_SEEN_KEY) === '1'; } catch (e) { /* brak dostępu do storage — nie pokazuj sekwencji */ seen = true; }
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (seen || reduced) {
+    try { localStorage.setItem(BOOT_SEEN_KEY, '1'); } catch (e) {}
+    return;
+  }
+
+  const linesEl = document.getElementById('boot-log-lines');
+  const lines = [
+    { t: '[ OK ] Montowanie /dev/wiedza...', cls: 'ok' },
+    { t: '[ OK ] Ładowanie 18 kategorii, 122 komend...', cls: 'ok' },
+    { t: '[ OK ] Inicjalizacja modułu purple-team...', cls: 'tag-violet' },
+    { t: '🐧 Witaj w TuxLab.', cls: 'welcome' }
+  ];
+  linesEl.innerHTML = lines.map((l, i) =>
+    `<p class="line ${l.cls === 'welcome' ? 'welcome' : ''}" style="animation-delay:${i * 0.28}s">${l.cls !== 'welcome' ? `<span class="${l.cls}">${esc(l.t.slice(0, 6))}</span>${esc(l.t.slice(6))}` : esc(l.t)}</p>`
+  ).join('') + `<p class="boot-skip" style="animation-delay:${lines.length * 0.28}s">kliknij, aby pominąć</p>`;
+
+  overlay.hidden = false;
+  let dismissed = false;
+  const dismiss = () => {
+    if (dismissed) return;
+    dismissed = true;
+    overlay.hidden = true;
+    try { localStorage.setItem(BOOT_SEEN_KEY, '1'); } catch (e) {}
+    overlay.removeEventListener('click', dismiss);
+    window.removeEventListener('keydown', dismiss);
+  };
+  overlay.addEventListener('click', dismiss);
+  window.addEventListener('keydown', dismiss);
+  setTimeout(dismiss, 2600);
+}
 
 function route() {
   const hash = location.hash.slice(1) || '/';
@@ -225,28 +269,39 @@ function nav(hash) { location.hash = hash; }
 /* ============================================================
    WIDOK: HOME — lista kategorii + testy końcowe
    ============================================================ */
+/* Rozszerzenia plików per kategoria — czysto kosmetyczny akcent "konfiguracji" */
+const CAT_FILE_EXT = {
+  'fundamenty': '.sh', 'pliki-katalogi': '.files', 'uprawnienia': '.conf', 'narzedzia-pomocnicze': '.tools',
+  'pakiety': '.list', 'fhs': '.tree', 'procesy': '.pid', 'siec-podstawy': '.sock',
+  'rekonesans': '.scan', 'enumeracja-web': '.dir', 'podatnosci': '.cve', 'ruch-sieciowy': '.pcap',
+  'eksploatacja': '.exploit', 'tunelowanie': '.tunnel', 'threat-hunting': '.log', 'ssh': '.key',
+  'bash-automatyzacja': '.cron', 'firewall': '.rules'
+};
+function catFilename(cat) { return cat.id + (CAT_FILE_EXT[cat.id] || ''); }
+
 function renderHome() {
   const stats = overallStats();
   const pct = Math.round((stats.complete / stats.total) * 100);
 
-  const cards = CATEGORIES.map(cat => {
+  const items = CATEGORIES.map(cat => {
     const s = catProgressStats(cat);
-    const badge = s.complete ? '<span class="badge badge-done" aria-label="Kategoria ukończona">✓ Ukończono</span>' : '';
+    const pctNode = Math.round((s.doneParts / s.totalParts) * 100);
+    const badge = s.complete ? '<span class="badge" aria-label="Kategoria ukończona">[OK] ukończono</span>' : '';
     return `
-      <li class="cat-card ${s.complete ? 'is-complete' : ''}">
-        <button class="cat-card-btn" data-nav="#/lesson/${cat.id}" aria-describedby="prog-${cat.id}">
-          <span class="cat-icon" aria-hidden="true">${esc(cat.icon)}</span>
-          <span class="cat-info">
-            <span class="cat-title">${esc(cat.title)} ${badge}</span>
-            <span class="cat-subtitle">${esc(cat.subtitle)}</span>
-            <span class="cat-progress" id="prog-${cat.id}">
+      <li class="chain-item ${s.complete ? 'is-complete' : ''}">
+        <button class="chain-node-btn" data-nav="#/lesson/${cat.id}" aria-describedby="prog-${cat.id}">
+          <span class="node-badge" style="--pct:${pctNode}" aria-hidden="true"><span class="node-badge-glyph">${esc(cat.icon)}</span></span>
+          <span class="node-info">
+            <span class="node-filename">${esc(catFilename(cat))}</span>
+            <span class="node-title">${esc(cat.title)} ${badge}</span>
+            <span class="node-subtitle">${esc(cat.subtitle)}</span>
+            <span class="node-progress" id="prog-${cat.id}">
               <span class="mini-pip ${s.lessonDone ? 'on' : ''}" title="Lekcja">L</span>
               <span class="mini-pip ${s.q1pass ? 'on' : ''}" title="Test ABCD">Q1</span>
               <span class="mini-pip ${s.q2pass ? 'on' : ''}" title="Test — wpisz komendę (z podpowiedzią)">Q2</span>
               <span class="mini-pip ${s.q3pass ? 'on' : ''}" title="Test — wpisz wszystko (bez podpowiedzi)">Q3</span>
             </span>
           </span>
-          <span class="cat-arrow" aria-hidden="true">›</span>
         </button>
       </li>`;
   }).join('');
@@ -256,22 +311,22 @@ function renderHome() {
   $app.innerHTML = `
     <header class="hero">
       <div class="hero-top">
-        <p class="eyebrow">root@tuxlab:~$</p>
-        <h1 class="hero-title">Tux<span class="accent-cyan">Lab</span></h1>
+        <p class="eyebrow">root@tuxlab:~$ ./start.sh</p>
+        <h1 class="hero-title"><span aria-hidden="true">🐧</span> Tux<span class="accent-violet">Lab</span></h1>
         <p class="hero-sub">Praktyczna nauka Linuksa, Kali i Purple Teamu — komendy do rozmów rekrutacyjnych i codziennej pracy w bezpieczeństwie ofensywnym.</p>
       </div>
       <div class="hero-stats" role="group" aria-label="Twój postęp">
         <div class="stat-box">
           <span class="stat-num">${stats.complete}/${stats.total}</span>
-          <span class="stat-label">kategorii ukończonych</span>
+          <span class="stat-label">kategorii</span>
         </div>
         <div class="stat-box">
-          <span class="stat-num">${stats.xp} XP</span>
-          <span class="stat-label">zdobyte punkty</span>
+          <span class="stat-num">${stats.xp}</span>
+          <span class="stat-label">xp</span>
         </div>
         <div class="stat-box">
-          <span class="stat-num">${stats.streak}🔥</span>
-          <span class="stat-label">dni pod rząd</span>
+          <span class="stat-num">${stats.streak}</span>
+          <span class="stat-label">dni z rzędu</span>
         </div>
       </div>
       <div class="progress-track" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Ogólny postęp kursu">
@@ -280,13 +335,16 @@ function renderHome() {
     </header>
 
     <section aria-labelledby="cats-heading">
-      <h2 id="cats-heading" class="section-title">Kategorie</h2>
-      <ul class="cat-list">${cards}</ul>
+      <h2 id="cats-heading" class="section-title">ścieżka nauki</h2>
+      <div class="chain-wrap" style="--fill-pct:${pct}%">
+        <div class="chain-spine" aria-hidden="true"></div>
+        <ol class="chain-list">${items}</ol>
+      </div>
     </section>
 
     <section aria-labelledby="finals-heading" class="finals-section">
-      <h2 id="finals-heading" class="section-title">Testy końcowe (mix wszystkich kategorii)</h2>
-      ${finalsUnlocked ? '' : `<p class="finals-hint">Odblokujesz je po ukończeniu wszystkich ${stats.total} kategorii (lekcja + oba quizy).</p>`}
+      <h2 id="finals-heading" class="section-title">testy końcowe</h2>
+      ${finalsUnlocked ? '' : `<p class="finals-hint"># odblokujesz po ukończeniu wszystkich ${stats.total} kategorii (lekcja + 3 testy)</p>`}
       <div class="finals-grid">
         ${renderFinalCard('final-1', 'Test końcowy I', stats.f1, finalsUnlocked)}
         ${renderFinalCard('final-2', 'Test końcowy II', stats.f2, finalsUnlocked)}
@@ -294,7 +352,7 @@ function renderHome() {
     </section>
 
     <footer class="app-footer">
-      <button class="link-btn" id="reset-btn" type="button">Wyzeruj postęp (localStorage)</button>
+      <button class="link-btn" id="reset-btn" type="button">wyzeruj postęp (localStorage)</button>
     </footer>
   `;
 
@@ -307,8 +365,8 @@ function renderFinalCard(id, title, passed, unlocked) {
   const qCount = n.quiz1.length + n.quiz2.length;
   return `
     <button class="final-card ${passed ? 'is-complete' : ''}" data-nav="#/final/${id}" ${unlocked ? '' : 'disabled aria-disabled="true"'}>
-      <span class="final-icon" aria-hidden="true">${unlocked ? '🏆' : '🔒'}</span>
-      <span class="final-title">${esc(title)} ${passed ? '<span class="badge badge-done">✓</span>' : ''}</span>
+      <span class="final-icon" aria-hidden="true">${unlocked ? '[*]' : '[--]'}</span>
+      <span class="final-title">${esc(title)} ${passed ? '<span class="badge badge-violet">[OK]</span>' : ''}</span>
       <span class="final-sub">${qCount} pytań mieszanych ze wszystkich kategorii</span>
     </button>`;
 }
@@ -356,34 +414,35 @@ function renderLesson(catId) {
   const s = catProgressStats(cat);
 
   $app.innerHTML = `
-    <nav class="breadcrumb"><a href="#/" class="link-btn">← Wszystkie kategorie</a></nav>
+    <nav class="breadcrumb"><a href="#/" class="link-btn">← wszystkie kategorie</a></nav>
     <header class="cat-header">
       <span class="cat-icon-lg" aria-hidden="true">${esc(cat.icon)}</span>
       <div>
+        <span class="cat-filename">${esc(catFilename(cat))}</span>
         <h1>${esc(cat.title)}</h1>
         <p class="hero-sub">${esc(cat.subtitle)}</p>
       </div>
     </header>
 
-    <p class="lesson-counter" aria-live="polite">Przerobione komendy: ${doneList.size} / ${cat.lesson.length}</p>
+    <p class="lesson-counter" aria-live="polite"># przerobione komendy: ${doneList.size} / ${cat.lesson.length}</p>
     <ul class="lesson-list">${items}</ul>
 
     <div class="cat-quiz-cta">
-      <h2 class="section-title">Sprawdź się</h2>
+      <h2 class="section-title">sprawdź się</h2>
       <div class="quiz-cta-grid">
         <button class="quiz-cta ${s.q1pass ? 'is-complete' : ''}" data-nav="#/quiz1/${cat.id}">
-          <span class="final-icon" aria-hidden="true">📝</span>
-          <span>Test ABCD ${s.q1pass ? '<span class="badge badge-done">✓ zaliczony</span>' : ''}</span>
+          <span class="final-icon" aria-hidden="true">[abcd]</span>
+          <span>Test ABCD ${s.q1pass ? '<span class="badge">[OK]</span>' : ''}</span>
           <span class="final-sub">${cat.quiz1.length} pytań • próg zaliczenia 70%</span>
         </button>
         <button class="quiz-cta ${s.q2pass ? 'is-complete' : ''}" data-nav="#/quiz2/${cat.id}">
-          <span class="final-icon" aria-hidden="true">⌨️</span>
-          <span>Wpisz komendę ${s.q2pass ? '<span class="badge badge-done">✓ zaliczony</span>' : ''}</span>
+          <span class="final-icon" aria-hidden="true">[>_]</span>
+          <span>Wpisz komendę ${s.q2pass ? '<span class="badge">[OK]</span>' : ''}</span>
           <span class="final-sub">${cat.quiz2.length} pytań • z podpowiedzią</span>
         </button>
         <button class="quiz-cta ${s.q3pass ? 'is-complete' : ''}" data-nav="#/quiz3/${cat.id}">
-          <span class="final-icon" aria-hidden="true">🧠</span>
-          <span>Wpisz wszystko sam(a) ${s.q3pass ? '<span class="badge badge-done">✓ zaliczony</span>' : ''}</span>
+          <span class="final-icon" aria-hidden="true">[!!]</span>
+          <span>Wpisz wszystko sam(a) ${s.q3pass ? '<span class="badge">[OK]</span>' : ''}</span>
           <span class="final-sub">${cat.quiz3.length} pytań • bez podpowiedzi</span>
         </button>
       </div>
@@ -536,7 +595,7 @@ function handleMcqAnswer(idx) {
 
   const fb = document.getElementById('quiz-feedback');
   fb.className = 'quiz-feedback ' + (correct ? 'fb-correct' : 'fb-wrong');
-  fb.innerHTML = `<strong>${correct ? '✓ Poprawnie!' : '✗ Niepoprawnie.'}</strong> ${esc(q.exp)}`;
+  fb.innerHTML = `<span class="log-tag ${correct ? 'log-tag-ok' : 'log-tag-fail'}">[${correct ? 'OK' : 'FAIL'}]</span><span class="exp-text">${esc(q.exp)}</span>`;
 
   if (correct) { s.correct++; playMicroSuccess(buttons[idx]); }
   announce(correct ? 'Poprawna odpowiedź.' : 'Niepoprawna odpowiedź. Zobacz wyjaśnienie.');
@@ -557,8 +616,8 @@ function handleTypeAnswer(value) {
     form.querySelector('button[type="submit"]').disabled = true;
     fb.className = 'quiz-feedback fb-correct';
     fb.innerHTML = s.retryActive
-      ? `<strong>✓ Teraz jest poprawnie.</strong> ${esc(q.exp)}`
-      : `<strong>✓ Poprawnie!</strong> ${esc(q.exp)}`;
+      ? `<span class="log-tag log-tag-ok">[OK]</span><span class="exp-text">Poprawione. ${esc(q.exp)}</span>`
+      : `<span class="log-tag log-tag-ok">[OK]</span><span class="exp-text">${esc(q.exp)}</span>`;
     // Wynik liczony jest wyłącznie z odpowiedzi za pierwszym podejściem (jak w quizie ABCD).
     // Poprawka po błędzie pozwala przejść dalej — to element nauki, nie liczy się do wyniku %.
     if (!s.retryActive) s.correct++;
@@ -570,7 +629,7 @@ function handleTypeAnswer(value) {
     // Pierwsza pomyłka — pokaż poprawne rozwiązanie i przejdź w tryb poprawy.
     s.retryActive = true;
     fb.className = 'quiz-feedback fb-wrong';
-    fb.innerHTML = `<strong>✗ To nie jest poprawna komenda.</strong> Prawidłowa odpowiedź: <code>${esc(q.answers[0])}</code>. ${esc(q.exp)}<br><span class="retry-note">Wpisz poprawną komendę poniżej, aby przejść dalej.</span>`;
+    fb.innerHTML = `<span class="log-tag log-tag-fail">[FAIL]</span><span class="exp-text">Poprawna odpowiedź: <code>${esc(q.answers[0])}</code>. ${esc(q.exp)}<span class="retry-note">Wpisz poprawną komendę poniżej, aby przejść dalej.</span></span>`;
     announce('Niepoprawna odpowiedź. Wpisz prawidłową komendę, aby kontynuować.');
     input.classList.add('shake');
     setTimeout(() => input.classList.remove('shake'), 400);
@@ -647,15 +706,18 @@ function finishQuiz() {
 
   const pct = Math.round(scorePct * 100);
   const nextStep = passed ? computeNextStep(s) : null;
+  const isFinal = s.storageId === 'final-1' || s.storageId === 'final-2';
 
   $app.innerHTML = `
     <div class="result-screen ${passed ? 'result-pass' : 'result-fail'}">
-      <div class="result-emblem" aria-hidden="true">${passed ? '🏆' : '💤'}</div>
-      <h1>${passed ? 'Zaliczone!' : 'Jeszcze nie tym razem'}</h1>
-      <p class="result-score">${s.correct} / ${total} poprawnych odpowiedzi (${pct}%)</p>
-      <p class="result-threshold">Próg zaliczenia: ${Math.round(PASS_THRESHOLD * 100)}%</p>
+      <div class="result-log">
+        <p class="line headline">[${passed ? 'OK' : 'FAIL'}] ${passed ? (isFinal ? 'Test końcowy zaliczony' : 'Test zaliczony') : 'Test nie zaliczony'}</p>
+        <p class="line">$ wynik: <span class="result-score-val">${s.correct} / ${total} (${pct}%)</span></p>
+        <p class="line"># próg zaliczenia: ${Math.round(PASS_THRESHOLD * 100)}%</p>
+        ${passed ? `<p class="line">$ xp: +15</p>` : ''}
+      </div>
       <div class="result-actions">
-        ${nextStep ? `<button class="btn-primary" id="next-step-btn">${esc(nextStep.label)}</button>` : ''}
+        ${nextStep ? `<button class="${isFinal ? 'btn-violet' : 'btn-primary'}" id="next-step-btn">${esc(nextStep.label)}</button>` : ''}
         <button class="${nextStep ? 'btn-secondary' : 'btn-primary'}" id="retry-btn">Spróbuj ponownie</button>
         <button class="btn-secondary" id="back-btn">${s.backHash === '#/' ? 'Wróć do listy kategorii' : 'Wróć do lekcji'}</button>
       </div>
@@ -667,24 +729,27 @@ function finishQuiz() {
   document.getElementById('retry-btn').addEventListener('click', () => startQuizSession(s));
   document.getElementById('back-btn').addEventListener('click', () => nav(s.backHash));
 
-  if (passed) fireConfetti();
+  if (passed) successFlash(isFinal);
 }
 
-/* ---------- Lekka, wydajna mikro-animacja "konfetti" (CSS, respektuje prefers-reduced-motion) ---------- */
-function fireConfetti() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const root = document.getElementById('toast-root');
-  const colors = ['#22d3ee', '#a855f7', '#4ade80', '#f472b6'];
-  for (let i = 0; i < 24; i++) {
-    const el = document.createElement('span');
-    el.className = 'confetti-piece';
-    el.style.left = (45 + Math.random() * 10) + 'vw';
-    el.style.background = colors[i % colors.length];
-    el.style.animationDelay = (Math.random() * 0.2) + 's';
-    el.style.setProperty('--dx', (Math.random() * 240 - 120) + 'px');
+/* ---------- Flash logu sukcesu — zastępuje konfetti, spójne z estetyką logów systemowych ---------- */
+function successFlash(isFinal) {
+  const root = document.getElementById('success-flash-root');
+  if (!root) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lines = isFinal
+    ? ['[OK] Test końcowy zaliczony', '[OK] +15 xp']
+    : ['[OK] Zaliczono', '[OK] +15 xp'];
+  root.innerHTML = '';
+  lines.forEach((text, i) => {
+    const el = document.createElement('div');
+    el.className = 'success-flash-line';
+    if (isFinal) el.style.color = 'var(--violet)';
+    el.textContent = text;
+    if (!reduced) el.style.animationDelay = (i * 0.15) + 's, ' + (i * 0.15 + 1.5) + 's';
     root.appendChild(el);
-    setTimeout(() => el.remove(), 1600);
-  }
+    setTimeout(() => el.remove(), reduced ? 100 : 2200);
+  });
 }
 
 /* ---------- Service Worker (offline PWA) ---------- */
