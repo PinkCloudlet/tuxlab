@@ -1,7 +1,7 @@
 {
   "name": "TuxLab — Nauka komend Linuxa",
   "short_name": "TuxLab",
-  "description": "Interaktywna nauka komend Linux, Kali i Purple Team po polsku.",
+  "description": "Interaktywna nauka komend Linuxa po polsku.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
