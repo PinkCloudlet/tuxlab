@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>TuxLab — Nauka komend Linuxa</title>
+<title>TuxLab — Linux / Kali / Purple Team</title>
 <meta name="description" content="TuxLab — interaktywna nauka komend Linux, Kali i Purple Team, po polsku, z zapisem postępu w przeglądarce." />
 
 <!-- Polityka bezpieczeństwa treści: aplikacja jest w 100% lokalna, bez zewnętrznych skryptów/zasobów -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self';" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self';" />
 <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 <meta name="referrer" content="no-referrer" />
 
@@ -19,7 +19,13 @@
 </head>
 <body>
 <a href="#app" id="skip-link">Przejdź do treści</a>
+
+<div id="boot-overlay" hidden aria-hidden="true">
+  <div class="boot-log" id="boot-log-lines"></div>
+</div>
+
 <div id="install-banner-root"><div id="install-banner"></div></div>
+<div id="success-flash-root" aria-hidden="true"></div>
 <div id="toast-root" aria-hidden="false"></div>
 <div id="live-region" class="sr-only" role="status" aria-live="polite"></div>
 
