@@ -1,7 +1,7 @@
 /* Prosty service worker: cache-first dla zasobów statycznych, umożliwia pracę offline.
    Aplikacja nie komunikuje się z żadnym serwerem — wszystkie dane żyją w localStorage klienta. */
 
-const CACHE_NAME = 'tuxlab-cache-v2';
+const CACHE_NAME = 'tuxlab-cache-v4';
 const ASSETS = [
   './',
   './index.html',
