@@ -15,7 +15,7 @@ const CATEGORIES = [
   id: "fundamenty",
   title: "Fundamenty Linuksa",
   subtitle: "Nawigacja, pliki i praca z tekstem",
-  icon: "❯_",
+  icon: "[$]",
   lesson: [
     { cmd:"pwd", en:"print working directory", pl:"Wypisz bieżący katalog roboczy",
       desc:"Pokazuje pełną ścieżkę katalogu, w którym aktualnie się znajdujesz.",
@@ -44,7 +44,7 @@ const CATEGORIES = [
     { cmd:"man", en:"manual", pl:"Wyświetl podręcznik/dokumentację polecenia",
       desc:"Pierwsze miejsce, gdzie sprawdzasz flagi nieznanego polecenia.",
       example:"man nmap" },
-    { cmd:"| (pipe)", en:"pipe", pl:"Potok — przekaż wyjście jednej komendy jako wejście drugiej",
+    { cmd:"| (pipe)", en:"pipe", pl:"Potok — przekaż wyjście jednej komendy jako wejście drugiej (tu: policz w access.log linie z „POST”)",
       desc:"Pozwala łączyć proste narzędzia w potężne łańcuchy przetwarzania danych.",
       example:"cat access.log | grep \"POST\" | wc -l" }
   ],
@@ -88,11 +88,69 @@ const CATEGORIES = [
 },
 // ============================================================
 {
+  id: "pliki-katalogi",
+  title: "Pliki i katalogi",
+  subtitle: "touch, cp, mv, rm, mkdir, rmdir",
+  icon: "[cp]",
+  lesson: [
+    { cmd:"touch", en:"touch", pl:"Utwórz pusty plik (lub zaktualizuj jego datę modyfikacji)",
+      desc:"Jeśli plik nie istnieje — tworzy go pusty. Jeśli istnieje — tylko odświeża znacznik czasu, nie zmieniając zawartości.",
+      example:"touch notatki.txt" },
+    { cmd:"mkdir", en:"make directory", pl:"Utwórz nowy katalog",
+      desc:"-p tworzy od razu całą ścieżkę katalogów (łącznie z brakującymi katalogami nadrzędnymi).",
+      example:"mkdir -p projekty/raporty" },
+    { cmd:"cp", en:"copy", pl:"Skopiuj plik lub katalog",
+      desc:"-r kopiuje rekurencyjnie (wymagane dla katalogów), -v pokazuje, co jest kopiowane (verbose).",
+      example:"cp -r raporty/ /tmp/backup/" },
+    { cmd:"mv", en:"move", pl:"Przenieś plik/katalog lub zmień jego nazwę",
+      desc:"mv działa też jako 'rename' — przenosząc plik do tej samej lokalizacji pod inną nazwą.",
+      example:"mv raport_stary.txt raport_2026.txt" },
+    { cmd:"rm", en:"remove", pl:"Usuń plik (trwale, bez kosza)",
+      desc:"-r usuwa rekurencyjnie katalog z zawartością, -f wymusza usunięcie bez pytania. Uważaj: brak cofnięcia.",
+      example:"rm -rf stare_logi/" },
+    { cmd:"rmdir", en:"remove directory", pl:"Usuń PUSTY katalog",
+      desc:"W przeciwieństwie do 'rm -r' zadziała tylko, gdy katalog jest pusty — bezpieczniejsza opcja, gdy nie chcesz niczego skasować przez pomyłkę.",
+      example:"rmdir stary_pusty_katalog" }
+  ],
+  quiz1: [
+    { q:"Które polecenie utworzy pusty plik notatki.txt (lub odświeży jego datę, jeśli już istnieje)?",
+      options:["touch notatki.txt","mkdir notatki.txt","cp notatki.txt","rm notatki.txt"], correct:0,
+      exp:"touch tworzy pusty plik albo aktualizuje znacznik czasu istniejącego." },
+    { q:"Które polecenie utworzy od razu całą ścieżkę katalogów projekty/raporty, nawet jeśli 'projekty' jeszcze nie istnieje?",
+      options:["mkdir projekty/raporty","mkdir -p projekty/raporty","touch -p projekty/raporty","cp -p projekty/raporty"], correct:1,
+      exp:"-p przy mkdir tworzy brakujące katalogi nadrzędne po drodze." },
+    { q:"Które polecenie skopiuje CAŁY katalog raporty/ rekurencyjnie do /tmp/backup/?",
+      options:["cp raporty/ /tmp/backup/","cp -r raporty/ /tmp/backup/","mv -r raporty/ /tmp/backup/","touch -r raporty/ /tmp/backup/"], correct:1,
+      exp:"-r jest wymagane przy cp, żeby skopiować katalog razem z zawartością." },
+    { q:"Jak bezpiecznie usunąć PUSTY katalog, tak by polecenie nie zadziałało, gdyby coś w nim jednak zostało?",
+      options:["rm katalog","rm -rf katalog","rmdir katalog","mv katalog /dev/null"], correct:2,
+      exp:"rmdir usuwa katalog tylko wtedy, gdy jest faktycznie pusty." },
+    { q:"Które polecenie zmieni nazwę pliku raport_stary.txt na raport_2026.txt?",
+      options:["cp raport_stary.txt raport_2026.txt","mv raport_stary.txt raport_2026.txt","touch raport_stary.txt raport_2026.txt","rm raport_stary.txt raport_2026.txt"], correct:1,
+      exp:"mv służy zarówno do przenoszenia, jak i zmiany nazwy pliku." }
+  ],
+  quiz2: [
+    { q:"Wpisz komendę tworzącą pusty plik o nazwie notatki.txt.",
+      answers:["touch notatki.txt"], hint:"touch <nazwa_pliku>", exp:"touch notatki.txt tworzy pusty plik." },
+    { q:"Wpisz komendę usuwającą rekurencyjnie i bez pytania katalog stare_logi wraz z zawartością.",
+      answers:["rm -rf stare_logi/","rm -rf stare_logi"], hint:"rm -rf <katalog>", exp:"rm -rf stare_logi/ — nieodwracalne, działaj ostrożnie." },
+    { q:"Wpisz komendę tworzącą od razu całą ścieżkę katalogów projekty/raporty.",
+      answers:["mkdir -p projekty/raporty"], hint:"mkdir -p <ścieżka>", exp:"mkdir -p projekty/raporty tworzy też brakujące katalogi nadrzędne." }
+  ]
+},
+// ============================================================
+{
   id: "uprawnienia",
   title: "Uprawnienia i użytkownicy",
   subtitle: "Prawa dostępu, hasła, sudo",
-  icon: "🔐",
+  icon: "[#]",
   lesson: [
+    { cmd:"ls -l", en:"long listing format (permission string)", pl:"Wyświetl plik z pełną notacją uprawnień (drwxr-xr-x) — tu: /etc/passwd",
+      desc:"10 znaków notacji: [1] typ pliku (d=katalog, -=plik, l=link symboliczny), [2-4] prawa właściciela (rwx), [5-7] prawa grupy, [8-10] prawa innych. Obok widać też liczbę dowiązań (linków), właściciela i grupę.",
+      example:"ls -l /etc/passwd\n# -rw-r--r-- 1 root root 2847 sty 12 10:00 /etc/passwd" },
+    { cmd:"chmod 644", en:"numeric permission modes", pl:"Ustaw typowy tryb liczbowy pliku (tu: 644 — właściciel rw-, reszta tylko do odczytu)",
+      desc:"Najczęstsze tryby: 777 = rwxrwxrwx (pełne prawa dla wszystkich — prawie zawsze zła praktyka bezpieczeństwa), 755 = rwxr-xr-x (typowe dla skryptów/katalogów), 644 = rw-r--r-- (typowe dla zwykłych plików), 750 = rwxr-x--- (właściciel + grupa), 000 = brak jakichkolwiek praw dla kogokolwiek.",
+      example:"chmod 644 raport.txt" },
     { cmd:"chmod 750", en:"change mode", pl:"Zmień uprawnienia do pliku/katalogu",
       desc:"Uprawnienia zapisujemy jako 3 cyfry (właściciel/grupa/inni), gdzie 4=odczyt,2=zapis,1=wykonanie. 750 = rwxr-x---.",
       example:"chmod 750 skrypt.sh" },
@@ -125,6 +183,11 @@ const CATEGORIES = [
       example:"find / -perm -4000 -type f 2>/dev/null" }
   ],
   quiz1: [
+    { q:"W wyniku 'ls -l' widzisz '-rwxr-xr--'. Co oznaczają pierwsze 4 znaki ('-rwx')?",
+      options:["To katalog z pełnymi prawami dla wszystkich","To zwykły plik z pełnymi prawami (rwx) dla właściciela","To link symboliczny bez żadnych praw","To plik dostępny tylko do odczytu dla wszystkich"], correct:1,
+      exp:"Pierwszy znak '-' oznacza zwykły plik (nie katalog), a 'rwx' to pełne prawa właściciela: odczyt, zapis, wykonanie." },
+    { q:"Który tryb liczbowy chmod odpowiada uprawnieniom rwxrwxrwx (pełne prawa dla wszystkich — zwykle zła praktyka)?",
+      options:["644","750","777","000"], correct:2, exp:"777 = rwx dla właściciela, grupy i wszystkich pozostałych." },
     { q:"Który plik przechowuje zahaszowane hasła użytkowników w systemie Linux?",
       options:["/etc/passwd","/etc/shadow","/etc/group","/etc/sudoers"], correct:1,
       exp:"/etc/shadow zawiera hasze haseł, dostępne tylko dla roota." },
@@ -147,6 +210,10 @@ const CATEGORIES = [
       exp:"visudo sprawdza składnię przed zapisem, chroniąc przed zablokowaniem dostępu do sudo." }
   ],
   quiz2: [
+    { q:"Wpisz komendę wyświetlającą plik /etc/passwd w formacie długim (z pełną notacją uprawnień).",
+      answers:["ls -l /etc/passwd"], hint:"ls -l <plik>", exp:"ls -l /etc/passwd pokazuje m.in. notację typu drwxr-xr-x." },
+    { q:"Wpisz komendę nadającą plikowi raport.txt typowy tryb 644 (właściciel: odczyt+zapis, reszta: tylko odczyt).",
+      answers:["chmod 644 raport.txt"], hint:"chmod 644 <plik>", exp:"chmod 644 raport.txt — rw-r--r--." },
     { q:"Wpisz komendę nadającą plikowi skrypt.sh uprawnienia rwxr-x--- (750).",
       answers:["chmod 750 skrypt.sh"], hint:"chmod <liczba> <plik>",
       exp:"chmod 750 skrypt.sh ustawia rwx dla właściciela, r-x dla grupy, brak dla innych." },
@@ -167,10 +234,181 @@ const CATEGORIES = [
 },
 // ============================================================
 {
+  id: "narzedzia-pomocnicze",
+  title: "Narzędzia pomocnicze",
+  subtitle: "sort, wc, nl, locate, whereis, date, clear",
+  icon: "[nl]",
+  lesson: [
+    { cmd:"sort", en:"sort", pl:"Posortuj linie tekstu alfabetycznie lub liczbowo",
+      desc:"-n sortuje numerycznie (nie alfabetycznie, więc 2 < 10), -r odwraca kolejność (malejąco).",
+      example:"sort -n liczby.txt" },
+    { cmd:"wc -l", en:"word count (lines)", pl:"Policz linie, słowa lub znaki w pliku",
+      desc:"-l liczy linie, -w słowa, -c bajty/znaki. Bardzo częste w potokach do szybkiego liczenia wyników.",
+      example:"cat access.log | wc -l" },
+    { cmd:"nl", en:"number lines", pl:"Wyświetl plik z numeracją linii",
+      desc:"Przydatne przy odwoływaniu się do konkretnej linii w dużym pliku logów czy konfiguracji.",
+      example:"nl /etc/ssh/sshd_config" },
+    { cmd:"clear", en:"clear", pl:"Wyczyść ekran terminala",
+      desc:"Nie usuwa historii poleceń — tylko czyści widok. Skrót klawiszowy Ctrl+L robi to samo.",
+      example:"clear" },
+    { cmd:"locate", en:"locate", pl:"Szybko znajdź plik po nazwie, korzystając z wcześniej zbudowanej bazy indeksu",
+      desc:"Dużo szybsze niż 'find', bo przeszukuje gotową bazę (aktualizowaną przez 'updatedb'), a nie cały dysk na żywo — baza może być lekko nieaktualna.",
+      example:"locate sshd_config" },
+    { cmd:"whereis", en:"whereis", pl:"Znajdź binarkę, kod źródłowy i stronę podręcznika (man) danego polecenia",
+      desc:"Szybszy i prostszy niż 'locate' do pytania 'gdzie fizycznie jest zainstalowany ten program'.",
+      example:"whereis nmap" },
+    { cmd:"date", en:"date", pl:"Pokaż (lub ustaw) bieżącą datę i godzinę systemową",
+      desc:"Przydatne przy znakowaniu czasowym logów własnych skryptów czy raportów.",
+      example:"date" },
+    { cmd:"help", en:"help", pl:"Wyświetl pomoc dla wbudowanego polecenia powłoki (bash builtin)",
+      desc:"Działa tylko dla poleceń wbudowanych w powłokę (np. cd, help, export) — dla zwykłych programów użyj 'man'.",
+      example:"help cd" },
+    { cmd:"finger", en:"finger", pl:"Pokaż informacje o użytkowniku systemowym (login, pełna nazwa, powłoka)",
+      desc:"Historyczne narzędzie, rzadziej domyślnie instalowane dziś — ale bywa wspominane przy enumeracji użytkowników na starszych/nietypowo skonfigurowanych systemach.",
+      example:"finger anna" }
+  ],
+  quiz1: [
+    { q:"Które polecenie policzy liczbę linii w pliku access.log, odczytując go z potoku?",
+      options:["cat access.log | wc -l","cat access.log | sort -l","cat access.log | nl -c","cat access.log | wc -w"], correct:0,
+      exp:"wc -l liczy linie przekazane na wejście." },
+    { q:"Czym różni się 'locate' od 'find' przy szukaniu pliku po nazwie?",
+      options:["locate jest wolniejsze, bo przeszukuje dysk na żywo","locate korzysta z gotowej, wcześniej zbudowanej bazy indeksu — jest szybsze, ale może być nieaktualne","locate działa tylko na katalogach domowych","Nie ma żadnej różnicy"], correct:1,
+      exp:"locate przeszukuje indeks (bazę) zamiast skanować cały system plików na bieżąco." },
+    { q:"Które polecenie pokaże, gdzie fizycznie zainstalowana jest binarka, kod źródłowy i strona man dla nmap?",
+      options:["locate nmap","whereis nmap","finger nmap","nl nmap"], correct:1,
+      exp:"whereis szuka plików binarnych, źródłowych i stron podręcznika powiązanych z daną nazwą." },
+    { q:"Które polecenie wyświetli pomoc dla WBUDOWANEGO polecenia powłoki, np. 'cd'?",
+      options:["man cd","help cd","whereis cd","locate cd"], correct:1,
+      exp:"'man' działa dla zewnętrznych programów, 'help' dla poleceń wbudowanych w powłokę (bash builtins)." },
+    { q:"Które polecenie posortuje plik liczby.txt NUMERYCZNIE (żeby 2 było przed 10)?",
+      options:["sort liczby.txt","sort -n liczby.txt","nl liczby.txt","wc -n liczby.txt"], correct:1,
+      exp:"Bez -n sort sortuje alfabetycznie (tekstowo), co dałoby 10 przed 2." }
+  ],
+  quiz2: [
+    { q:"Wpisz komendę liczącą linie w pliku access.log przekazanym przez potok z 'cat'.",
+      answers:["cat access.log | wc -l"], hint:"cat <plik> | wc -l", exp:"cat access.log | wc -l liczy linie." },
+    { q:"Wpisz komendę wyszukującą plik sshd_config za pomocą indeksu locate.",
+      answers:["locate sshd_config"], hint:"locate <nazwa>", exp:"locate sshd_config." },
+    { q:"Wpisz komendę pokazującą, gdzie zainstalowany jest program nmap (binarka, źródła, man).",
+      answers:["whereis nmap"], hint:"whereis <nazwa>", exp:"whereis nmap." },
+    { q:"Wpisz komendę sortującą numerycznie plik liczby.txt.",
+      answers:["sort -n liczby.txt"], hint:"sort -n <plik>", exp:"sort -n liczby.txt." }
+  ]
+},
+// ============================================================
+{
+  id: "pakiety",
+  title: "Pakiety (APT)",
+  subtitle: "apt, apt-get, instalacja i usuwanie",
+  icon: "[apt]",
+  lesson: [
+    { cmd:"sudo apt update", en:"apt update", pl:"Odśwież lokalną listę dostępnych pakietów i ich wersji",
+      desc:"Nie instaluje ani nie aktualizuje niczego samo w sobie — tylko pobiera aktualny spis tego, co jest dostępne w repozytoriach. Zawsze pierwszy krok przed install/upgrade.",
+      example:"sudo apt update" },
+    { cmd:"sudo apt upgrade", en:"apt upgrade", pl:"Zainstaluj najnowsze dostępne wersje już zainstalowanych pakietów",
+      desc:"Aktualizuje wszystko, co masz zainstalowane, do najnowszych wersji widocznych po ostatnim 'apt update'.",
+      example:"sudo apt upgrade" },
+    { cmd:"sudo apt install", en:"apt install", pl:"Zainstaluj nowy pakiet (program) z repozytorium",
+      desc:"Nowoczesny, zalecany interfejs do zarządzania pakietami w Debianie/Kali/Ubuntu — czytelniejszy niż apt-get.",
+      example:"sudo apt install nmap" },
+    { cmd:"sudo apt remove", en:"apt remove", pl:"Odinstaluj pakiet, zachowując jego pliki konfiguracyjne",
+      desc:"'apt purge' usunie dodatkowo też pliki konfiguracyjne — remove zostawia je na wypadek ponownej instalacji.",
+      example:"sudo apt remove nikto" },
+    { cmd:"apt-get install", en:"apt-get install", pl:"Starszy, klasyczny interfejs do instalacji pakietów (poprzednik apt)",
+      desc:"Wciąż szeroko spotykany w starszych poradnikach i skryptach — funkcjonalnie bardzo zbliżony do 'apt install'.",
+      example:"sudo apt-get install nikto" },
+    { cmd:"apt search", en:"apt search", pl:"Wyszukaj pakiet po nazwie lub słowie kluczowym w opisie",
+      desc:"Przydatne, gdy nie pamiętasz dokładnej nazwy pakietu — np. szukając narzędzia do fuzzing webowego.",
+      example:"apt search fuzzing" }
+  ],
+  quiz1: [
+    { q:"Jaki jest typowy pierwszy krok przed instalacją lub aktualizacją pakietów przez apt?",
+      options:["sudo apt remove","sudo apt update","sudo apt search","sudo apt purge"], correct:1,
+      exp:"apt update odświeża listę dostępnych pakietów z repozytoriów — bez tego apt może nie widzieć najnowszych wersji." },
+    { q:"Która komenda zainstaluje nowy pakiet nmap z repozytorium?",
+      options:["sudo apt remove nmap","sudo apt update nmap","sudo apt install nmap","sudo apt search nmap"], correct:2,
+      exp:"sudo apt install <pakiet> instaluje nowy program." },
+    { q:"Czym różni się 'apt' od 'apt-get'?",
+      options:["Nie ma różnicy funkcjonalnej — apt to nowszy, bardziej czytelny interfejs do tych samych zadań","apt-get jest nowszy niż apt","apt działa tylko na Kali, apt-get wszędzie indziej","apt służy tylko do usuwania pakietów"], correct:0,
+      exp:"apt to nowocześniejszy, bardziej przyjazny interfejs wprowadzony jako następca apt-get, ale oba zarządzają tymi samymi pakietami." },
+    { q:"Która komenda zaktualizuje WSZYSTKIE już zainstalowane pakiety do najnowszych dostępnych wersji?",
+      options:["sudo apt install","sudo apt upgrade","sudo apt search","sudo apt remove"], correct:1,
+      exp:"apt upgrade aktualizuje zainstalowane pakiety." }
+  ],
+  quiz2: [
+    { q:"Wpisz komendę odświeżającą listę dostępnych pakietów.",
+      answers:["sudo apt update"], hint:"sudo apt update", exp:"sudo apt update." },
+    { q:"Wpisz komendę instalującą pakiet nmap przez apt.",
+      answers:["sudo apt install nmap"], hint:"sudo apt install <pakiet>", exp:"sudo apt install nmap." },
+    { q:"Wpisz komendę odinstalowującą pakiet nikto (zachowując pliki konfiguracyjne).",
+      answers:["sudo apt remove nikto"], hint:"sudo apt remove <pakiet>", exp:"sudo apt remove nikto." }
+  ]
+},
+// ============================================================
+{
+  id: "fhs",
+  title: "Struktura systemu plików",
+  subtitle: "/bin /etc /var /tmp /usr i reszta hierarchii",
+  icon: "[fs]",
+  lesson: [
+    { cmd:"/bin", en:"binaries", pl:"Podstawowe programy systemowe dostępne dla wszystkich użytkowników",
+      desc:"Zawiera kluczowe polecenia takie jak ls, cat, cp — potrzebne nawet w trybie awaryjnym.", example:"/bin" },
+    { cmd:"/boot", en:"boot files", pl:"Pliki potrzebne do uruchomienia (startu) systemu",
+      desc:"Jądro systemu (kernel) i pliki bootloadera (np. GRUB) — krytyczne, rzadko ruszane ręcznie.", example:"/boot" },
+    { cmd:"/dev", en:"devices", pl:"Pliki reprezentujące urządzenia sprzętowe",
+      desc:"W Linuksie 'wszystko jest plikiem' — dyski, porty, terminale widać tu jako pliki specjalne (np. /dev/sda).", example:"/dev" },
+    { cmd:"/etc", en:"et cetera (configuration)", pl:"Pliki konfiguracyjne systemu i zainstalowanych usług",
+      desc:"Tu znajdziesz m.in. /etc/passwd, /etc/shadow, /etc/ssh/sshd_config — jeden z najczęściej przeglądanych katalogów przy audycie.", example:"/etc" },
+    { cmd:"/home", en:"home directories", pl:"Katalogi domowe zwykłych użytkowników",
+      desc:"Każdy użytkownik (poza rootem) ma tu swój podkatalog, np. /home/anna.", example:"/home" },
+    { cmd:"/lib", en:"libraries", pl:"Biblioteki współdzielone potrzebne programom z /bin i /sbin",
+      desc:"Odpowiednik .dll z Windows — pliki .so, bez których programy systemowe by nie wystartowały.", example:"/lib" },
+    { cmd:"/opt", en:"optional software", pl:"Oprogramowanie dodatkowe, instalowane poza standardowym menedżerem pakietów",
+      desc:"Często używane przez komercyjne lub ręcznie paczkowane aplikacje, żeby nie mieszać się z plikami systemowymi.", example:"/opt" },
+    { cmd:"/proc", en:"process information", pl:"Wirtualny katalog z informacjami o działających procesach i jądrze (na żywo)",
+      desc:"Nie istnieje fizycznie na dysku — jądro generuje go w locie. Np. /proc/cpuinfo pokazuje dane o procesorze.", example:"/proc" },
+    { cmd:"/root", en:"root's home", pl:"Katalog domowy użytkownika root (superużytkownika)",
+      desc:"Nie mylić z '/' (katalogiem głównym całego systemu) — to osobny, prywatny katalog domowy roota.", example:"/root" },
+    { cmd:"/sbin", en:"system binaries", pl:"Programy systemowe do administracji, zwykle wymagające roota",
+      desc:"Np. narzędzia do zarządzania siecią czy dyskami — codzienny użytkownik rzadko ich potrzebuje.", example:"/sbin" },
+    { cmd:"/tmp", en:"temporary files", pl:"Pliki tymczasowe, zwykle czyszczone przy restarcie systemu",
+      desc:"Częsty cel przy eskalacji uprawnień — zapisywalny dla wszystkich, co bywa źle wykorzystywane przy błędnej konfiguracji skryptów.", example:"/tmp" },
+    { cmd:"/usr", en:"user programs", pl:"Większość zainstalowanych programów, bibliotek i dokumentacji dla użytkowników",
+      desc:"Mimo nazwy nie chodzi o katalogi domowe (to /home) — tu trafia np. oprogramowanie instalowane przez apt.", example:"/usr" },
+    { cmd:"/var", en:"variable data", pl:"Dane zmieniające się w czasie działania systemu — logi, cache, kolejki",
+      desc:"Tu znajdziesz m.in. /var/log z logami systemowymi i aplikacji — pierwszy przystanek przy threat huntingu.", example:"/var" }
+  ],
+  quiz1: [
+    { q:"W którym katalogu znajdziesz pliki konfiguracyjne systemu, np. /etc/passwd i sshd_config?",
+      options:["/var","/etc","/usr","/opt"], correct:1, exp:"/etc to katalog konfiguracji systemu i usług." },
+    { q:"W którym katalogu szukasz najpierw logów systemowych i aplikacji podczas threat huntingu?",
+      options:["/var","/boot","/dev","/lib"], correct:0, exp:"/var przechowuje dane zmienne w czasie, w tym logi (/var/log)." },
+    { q:"Który katalog to wirtualny, generowany na żywo przez jądro widok procesów i informacji o systemie?",
+      options:["/proc","/root","/sbin","/tmp"], correct:0, exp:"/proc nie istnieje fizycznie na dysku — tworzy go jądro w locie." },
+    { q:"Dlaczego /tmp bywa istotny przy eskalacji uprawnień?",
+      options:["Bo jest niedostępny dla zwykłych użytkowników","Bo jest zwykle zapisywalny dla wszystkich, co bywa źle wykorzystywane przez błędnie skonfigurowane skrypty","Bo przechowuje hasze haseł","Bo zawiera jądro systemu"], correct:1,
+      exp:"Szerokie uprawnienia zapisu w /tmp w połączeniu z błędami w skryptach to klasyczny wektor eskalacji." },
+    { q:"Czym różni się /root od /home?",
+      options:["/root to katalog domowy superużytkownika (root), a /home zawiera katalogi domowe zwykłych użytkowników","To dokładnie to samo","/home jest tylko dla roota","/root zawiera jądro systemu"], correct:0,
+      exp:"/root to prywatny katalog domowy roota, osobny od katalogów zwykłych użytkowników w /home." }
+  ],
+  quiz2: [
+    { q:"Wpisz ścieżkę katalogu, w którym znajdziesz pliki konfiguracyjne systemu i usług (np. sshd_config).",
+      answers:["/etc"], hint:"Krótka ścieżka, 4 znaki.", exp:"/etc to katalog konfiguracji." },
+    { q:"Wpisz ścieżkę katalogu z logami systemowymi i aplikacji, kluczowego przy threat huntingu.",
+      answers:["/var"], hint:"Dane 'zmienne w czasie'.", exp:"/var — m.in. /var/log." },
+    { q:"Wpisz ścieżkę katalogu domowego superużytkownika (roota) — innego niż katalogi zwykłych użytkowników.",
+      answers:["/root"], hint:"Nie mylić z '/'.", exp:"/root to katalog domowy roota." },
+    { q:"Wpisz ścieżkę katalogu na pliki tymczasowe, często zapisywalnego dla wszystkich.",
+      answers:["/tmp"], hint:"3 litery.", exp:"/tmp." }
+  ]
+},
+// ============================================================
+{
   id: "procesy",
   title: "Procesy i system",
   subtitle: "ps, kill, systemctl, journalctl",
-  icon: "⚙",
+  icon: "[%]",
   lesson: [
     { cmd:"ps aux", en:"process status", pl:"Pokaż wszystkie uruchomione procesy w systemie",
       desc:"a=wszyscy użytkownicy, u=format z użytkownikiem, x=procesy bez terminala. Podstawa enumeracji po eksploitacji.",
@@ -187,7 +425,7 @@ const CATEGORIES = [
     { cmd:"journalctl -u", en:"journal control", pl:"Przeglądaj logi systemowe danej usługi (systemd)",
       desc:"-u filtruje wg jednostki (usługi), -f śledzi logi na żywo, --since ogranicza czasowo.",
       example:"journalctl -u ssh -f" },
-    { cmd:"jobs / nohup / &", en:"background jobs", pl:"Zarządzaj procesami działającymi w tle",
+    { cmd:"jobs / nohup / &", en:"background jobs", pl:"Zarządzaj procesami działającymi w tle (tu: uruchom w tle skrypt skaner.sh, przeżywający wylogowanie)",
       desc:"& uruchamia w tle, nohup pozwala procesowi przeżyć wylogowanie, jobs listuje procesy tła bieżącej sesji.",
       example:"nohup ./skaner.sh &" }
   ],
@@ -225,7 +463,7 @@ const CATEGORIES = [
   id: "siec-podstawy",
   title: "Sieć — podstawy",
   subtitle: "curl, nc, ping, traceroute, ss",
-  icon: "🌐",
+  icon: "[::]",
   lesson: [
     { cmd:"ping -c 4", en:"packet internet groper", pl:"Sprawdź dostępność hosta w sieci",
       desc:"-c ogranicza liczbę wysłanych pakietów ICMP (bez tego ping działałby w nieskończoność).",
@@ -244,12 +482,18 @@ const CATEGORIES = [
       example:"ss -tulwn" },
     { cmd:"wget", en:"web get", pl:"Pobierz plik z sieci przez HTTP/FTP",
       desc:"Dobre do pobierania exploitów, skryptów enumeracyjnych na docelową maszynę.",
-      example:"wget http://10.10.10.5/linpeas.sh" }
+      example:"wget http://10.10.10.5/linpeas.sh" },
+    { cmd:"ifconfig", en:"interface configuration", pl:"Pokaż (lub skonfiguruj) interfejsy sieciowe — starsze narzędzie",
+      desc:"Historyczny odpowiednik nowszego 'ip addr' — wciąż powszechnie spotykany na Kali i w starszych poradnikach, pokazuje adresy IP, maski i stan interfejsów.",
+      example:"ifconfig" }
   ],
   quiz1: [
     { q:"Które polecenie sprawdzi dostępność hosta 8.8.8.8, wysyłając dokładnie 4 pakiety?",
       options:["ping 8.8.8.8","ping -c 4 8.8.8.8","traceroute -c 4 8.8.8.8","curl -c 4 8.8.8.8"], correct:1,
       exp:"-c 4 ogranicza ping do 4 pakietów ICMP." },
+    { q:"Które polecenie (starsze, ale wciąż spotykane na Kali) pokaże adresy IP i stan interfejsów sieciowych?",
+      options:["ifconfig","traceroute","wget","nc"], correct:0,
+      exp:"ifconfig to historyczne narzędzie do przeglądu/konfiguracji interfejsów sieciowych." },
     { q:"Które polecenie pobierze WYŁĄCZNIE nagłówki odpowiedzi HTTP ze strony?",
       options:["curl -X GET","curl -I","wget --headers-only","nc -H"], correct:1, exp:"curl -I wysyła żądanie HEAD i zwraca same nagłówki." },
     { q:"Które polecenie uruchomi nasłuch na porcie 4444 (typowy listener do reverse shell)?",
@@ -263,6 +507,8 @@ const CATEGORIES = [
       exp:"traceroute pokazuje kolejne routery (hopy) na drodze do celu." }
   ],
   quiz2: [
+    { q:"Wpisz komendę (starsze narzędzie) pokazującą adresy IP i stan interfejsów sieciowych.",
+      answers:["ifconfig"], hint:"Jedno słowo, bez flag.", exp:"ifconfig." },
     { q:"Wpisz komendę wysyłającą dokładnie 4 pakiety ping do hosta 192.168.1.1.",
       answers:["ping -c 4 192.168.1.1"], hint:"ping -c <liczba> <host>", exp:"ping -c 4 192.168.1.1." },
     { q:"Wpisz komendę pobierającą tylko nagłówki HTTP ze strony https://example.com.",
@@ -278,7 +524,7 @@ const CATEGORIES = [
   id: "rekonesans",
   title: "Rekonesans sieciowy",
   subtitle: "nmap, netdiscover, arp-scan",
-  icon: "🛰",
+  icon: "[?]",
   lesson: [
     { cmd:"nmap -sV -sC", en:"Network Mapper — service version, scripts", pl:"Skanuj porty z wykrywaniem wersji usług i domyślnymi skryptami NSE",
       desc:"-sV wykrywa wersje oprogramowania, -sC uruchamia domyślne, bezpieczne skrypty NSE (banner, enum).",
@@ -326,7 +572,7 @@ const CATEGORIES = [
   id: "enumeracja-web",
   title: "Enumeracja webowa",
   subtitle: "gobuster, ffuf, whatweb, arjun",
-  icon: "🕸",
+  icon: "[/]",
   lesson: [
     { cmd:"gobuster dir -u -w", en:"go buster (directory mode)", pl:"Szukaj ukrytych katalogów/plików na serwerze WWW",
       desc:"-u wskazuje URL celu, -w słownik (np. z SecLists), -x rozszerzenia plików do sprawdzenia.",
@@ -378,7 +624,7 @@ const CATEGORIES = [
   id: "podatnosci",
   title: "Weryfikacja podatności",
   subtitle: "searchsploit, nikto, sqlmap (podstawy)",
-  icon: "🛡",
+  icon: "[!]",
   lesson: [
     { cmd:"searchsploit", en:"search exploit", pl:"Przeszukaj lokalną kopię bazy Exploit-DB",
       desc:"Działa offline, świetne po zidentyfikowaniu konkretnej wersji oprogramowania przez nmap -sV.",
@@ -422,7 +668,7 @@ const CATEGORIES = [
   id: "ruch-sieciowy",
   title: "Analiza ruchu sieciowego",
   subtitle: "tcpdump, tshark, curl/httpie",
-  icon: "📡",
+  icon: "[<>]",
   lesson: [
     { cmd:"tcpdump -i eth0", en:"TCP dump", pl:"Przechwytuj ruch sieciowy na wskazanym interfejsie",
       desc:"-w zapisuje do pliku .pcap, -n bez rozwiązywania DNS, filtry np. 'port 80' ograniczają przechwytywany ruch.",
@@ -436,7 +682,7 @@ const CATEGORIES = [
     { cmd:"curl -X POST -H", en:"custom HTTP request", pl:"Ręcznie skonstruuj żądanie HTTP z niestandardowymi nagłówkami",
       desc:"Kluczowe przy testowaniu API, walidacji CORS i mechanizmów autoryzacji.",
       example:"curl -X POST -H \"Content-Type: application/json\" -d '{\"user\":\"a\"}' http://10.10.10.5/api/login" },
-    { cmd:"httpie (http)", en:"HTTPie", pl:"Bardziej czytelna alternatywa dla curl przy testowaniu API",
+    { cmd:"httpie (http)", en:"HTTPie", pl:"Bardziej czytelna alternatywa dla curl przy testowaniu API (tu: zaloguj się POST-em do 10.10.10.5/api/login, user=a, pass=b)",
       desc:"Domyślnie koloruje i formatuje JSON, prostsza składnia dla nagłówków i danych.",
       example:"http POST 10.10.10.5/api/login user=a pass=b" }
   ],
@@ -468,7 +714,7 @@ const CATEGORIES = [
   id: "eksploatacja",
   title: "Eksploatacja i walidacja",
   subtitle: "sqlmap, hydra, netexec, responder",
-  icon: "💥",
+  icon: "[*]",
   lesson: [
     { cmd:"sqlmap --batch --risk", en:"SQL map (automated)", pl:"Automatyzuj testy SQLi z domyślnymi odpowiedziami i poziomem ryzyka",
       desc:"--batch pomija pytania interaktywne, --risk/--level kontrolują agresywność testów (uważaj na środowiska produkcyjne!).",
@@ -476,7 +722,7 @@ const CATEGORIES = [
     { cmd:"hydra -l -P", en:"Hydra (brute force)", pl:"Testuj poświadczenia logowania metodą słownikową",
       desc:"-l login (pojedynczy), -L plik loginów, -P plik haseł, na końcu podajesz usługę (ssh, http-post-form itd.).",
       example:"hydra -l admin -P rockyou.txt ssh://10.10.10.5" },
-    { cmd:"netexec (nxc)", en:"Network Exec (dawniej CrackMapExec)", pl:"Testuj i waliduj poświadczenia w usługach Windows/SMB w wielu hostach naraz",
+    { cmd:"netexec (nxc)", en:"Network Exec (dawniej CrackMapExec)", pl:"Testuj i waliduj poświadczenia w usługach Windows/SMB w wielu hostach naraz (tu: sieć 10.10.10.0/24, SMB, login admin, hasło Password1)",
       desc:"Następca CrackMapExec — pozwala szybko zweryfikować, gdzie działają dane poświadczenia (SMB, WinRM, itd.).",
       example:"nxc smb 10.10.10.0/24 -u admin -p 'Password1'" },
     { cmd:"responder -I", en:"Responder", pl:"Symuluj ataki LLMNR/NBT-NS poisoning, by przechwycić hasze uwierzytelniania",
@@ -510,7 +756,7 @@ const CATEGORIES = [
   id: "tunelowanie",
   title: "Tunelowanie i pivoting",
   subtitle: "ssh -L/-R/-D, socat, chisel, ligolo-ng",
-  icon: "🔀",
+  icon: "[=>]",
   lesson: [
     { cmd:"ssh -L", en:"local port forwarding", pl:"Przekieruj lokalny port do usługi za maszyną pośredniczącą",
       desc:"ssh -L <port_lokalny>:<host_docelowy>:<port_docelowy> user@pivot — udostępnia usługę z sieci wewnętrznej lokalnie.",
@@ -557,7 +803,7 @@ const CATEGORIES = [
   id: "threat-hunting",
   title: "Threat hunting i logi",
   subtitle: "grep/awk/sed/jq, ps/ss/lsof forensics",
-  icon: "🔎",
+  icon: "[gr]",
   lesson: [
     { cmd:"awk '{print $1}'", en:"Aho, Weinberger, Kernighan (język przetwarzania tekstu)", pl:"Wyciągaj i przetwarzaj kolumny danych tekstowych",
       desc:"Bardzo potężne przy parsowaniu logów w kolumnach, np. adresów IP z logów Apache/Nginx.",
@@ -565,10 +811,10 @@ const CATEGORIES = [
     { cmd:"sed 's/x/y/g'", en:"stream editor", pl:"Automatycznie edytuj/zamieniaj tekst w strumieniu danych",
       desc:"Klasyczne zastosowanie: masowa zamiana wzorców w logach lub plikach konfiguracyjnych.",
       example:"sed 's/ERROR/BŁĄD/g' log.txt" },
-    { cmd:"jq", en:"JSON query", pl:"Parsuj i filtruj dane w formacie JSON w terminalu",
+    { cmd:"jq", en:"JSON query", pl:"Parsuj i filtruj dane w formacie JSON w terminalu (tu: z events.json wybierz wpisy ze statusem failed)",
       desc:"Niezbędny przy analizie logów JSON (np. z API, ELK, chmurowych usług).",
       example:"cat events.json | jq '.[] | select(.status==\"failed\")'" },
-    { cmd:"sort | uniq -c", en:"sort, unique count", pl:"Policz wystąpienia unikalnych wartości (np. adresów IP)",
+    { cmd:"sort | uniq -c", en:"sort, unique count", pl:"Policz wystąpienia unikalnych wartości, np. adresów IP w access.log",
       desc:"Klasyczny łańcuch do szybkiej analizy częstości — kto najczęściej odpytuje serwer.",
       example:"cat access.log | awk '{print $1}' | sort | uniq -c | sort -nr | head" },
     { cmd:"lsof -i", en:"list open files (internet)", pl:"Pokaż otwarte połączenia sieciowe i powiązane z nimi procesy",
@@ -607,7 +853,7 @@ const CATEGORIES = [
   id: "ssh",
   title: "SSH — bezpieczny dostęp",
   subtitle: "ssh-keygen, scp, sshd_config",
-  icon: "🔑",
+  icon: "[key]",
   lesson: [
     { cmd:"ssh-keygen -t ed25519", en:"SSH key generator", pl:"Wygeneruj parę kluczy SSH (prywatny/publiczny)",
       desc:"ed25519 to nowoczesny, zalecany algorytm — szybszy i bezpieczniejszy niż stare RSA-1024/2048.",
@@ -623,7 +869,10 @@ const CATEGORIES = [
       example:"sudo nano /etc/ssh/sshd_config" },
     { cmd:"ssh -i", en:"identity file", pl:"Zaloguj się przez SSH używając wskazanego klucza prywatnego",
       desc:"Przydatne, gdy masz wiele kluczy do różnych serwerów/projektów.",
-      example:"ssh -i ~/.ssh/id_ed25519 user@10.10.10.5" }
+      example:"ssh -i ~/.ssh/id_ed25519 user@10.10.10.5" },
+    { cmd:"sudo systemctl start/stop ssh", en:"start/stop the SSH service", pl:"Uruchom lub zatrzymaj usługę (daemon) SSH na serwerze",
+      desc:"Nowoczesny sposób (systemd): 'sudo systemctl start ssh' / 'stop' / 'restart'. Starszy, wciąż spotykany odpowiednik: 'sudo service ssh start/stop'.",
+      example:"sudo systemctl start ssh" }
   ],
   quiz1: [
     { q:"Które polecenie wygeneruje nowoczesną parę kluczy SSH typu ed25519?",
@@ -637,9 +886,14 @@ const CATEGORIES = [
       exp:"PermitRootLogin no w /etc/ssh/sshd_config blokuje logowanie roota po SSH." },
     { q:"Które polecenie skopiuje plik raport.pdf na zdalny serwer przez SSH?",
       options:["cp raport.pdf user@host:/tmp/","scp raport.pdf user@host:/tmp/","ssh raport.pdf user@host:/tmp/","ftp raport.pdf user@host"], correct:1,
-      exp:"scp kopiuje pliki przez szyfrowany kanał SSH, ze składnią podobną do cp." }
+      exp:"scp kopiuje pliki przez szyfrowany kanał SSH, ze składnią podobną do cp." },
+    { q:"Które polecenie (nowoczesny, systemd-owy sposób) uruchomi usługę SSH na serwerze?",
+      options:["sudo systemctl start ssh","sudo ssh --start","sudo apt start ssh","ssh-keygen --start"], correct:0,
+      exp:"sudo systemctl start ssh uruchamia daemon sshd przez systemd." }
   ],
   quiz2: [
+    { q:"Wpisz komendę (systemd) uruchamiającą usługę SSH.",
+      answers:["sudo systemctl start ssh"], hint:"sudo systemctl start <usługa>", exp:"sudo systemctl start ssh." },
     { q:"Wpisz komendę generującą nową parę kluczy SSH typu ed25519 z komentarzem \"anna@laptop\".",
       answers:["ssh-keygen -t ed25519 -C \"anna@laptop\"","ssh-keygen -t ed25519 -C anna@laptop"], hint:"ssh-keygen -t ed25519 -C <komentarz>",
       exp:"ssh-keygen -t ed25519 -C \"anna@laptop\"." },
@@ -653,7 +907,7 @@ const CATEGORIES = [
   id: "bash-automatyzacja",
   title: "Bash i automatyzacja",
   subtitle: "zmienne, pętle, cron",
-  icon: "📜",
+  icon: "[sh]",
   lesson: [
     { cmd:"#!/bin/bash", en:"shebang", pl:"Pierwsza linia skryptu wskazująca interpreter",
       desc:"Mówi systemowi, którym programem (tu: bashem) uruchomić resztę pliku.",
@@ -668,8 +922,8 @@ const CATEGORIES = [
       desc:"Bez tego uruchomisz skrypt tylko przez 'bash skrypt.sh', a nie bezpośrednio './skrypt.sh'.",
       example:"chmod +x skrypt.sh && ./skrypt.sh" },
     { cmd:"crontab -e", en:"cron table (edit)", pl:"Edytuj harmonogram cyklicznych zadań bieżącego użytkownika",
-      desc:"Format: minuta godzina dzień_miesiąca miesiąc dzień_tygodnia polecenie.",
-      example:"0 2 * * * /home/anna/skanuj.sh  # codziennie o 2:00" },
+      desc:"Otwiera edytor harmonogramu. Format wewnątrz: minuta godzina dzień_miesiąca miesiąc dzień_tygodnia polecenie — np. '0 2 * * * /home/anna/skanuj.sh' uruchomi skrypt codziennie o 2:00.",
+      example:"crontab -e\n# w edytorze dopisz: 0 2 * * * /home/anna/skanuj.sh" },
     { cmd:"crontab -l", en:"cron table (list)", pl:"Wyświetl aktualnie zaplanowane zadania cron",
       desc:"Szybki sposób weryfikacji, co jest zaplanowane na danym koncie — istotne też przy audycie bezpieczeństwa.",
       example:"crontab -l" }
@@ -700,7 +954,7 @@ const CATEGORIES = [
   id: "firewall",
   title: "Firewall",
   subtitle: "iptables, ufw, nftables",
-  icon: "🧱",
+  icon: "[||]",
   lesson: [
     { cmd:"iptables -L -n -v", en:"IP tables (list)", pl:"Wyświetl aktualne reguły firewalla iptables",
       desc:"-L listuje reguły, -n bez rozwiązywania DNS, -v szczegóły (liczniki pakietów/bajtów).",
@@ -711,7 +965,7 @@ const CATEGORIES = [
     { cmd:"iptables -A INPUT -j DROP", en:"drop rule", pl:"Domyślnie odrzucaj (cicho) cały pozostały ruch przychodzący",
       desc:"Zwykle umieszcza się na końcu łańcucha jako reguła 'domyślnie odmów' po wcześniejszych ACCEPT.",
       example:"sudo iptables -A INPUT -j DROP" },
-    { cmd:"ufw enable / ufw allow", en:"Uncomplicated Firewall", pl:"Prostszy interfejs do zarządzania firewallem (nakładka na iptables)",
+    { cmd:"ufw enable / ufw allow", en:"Uncomplicated Firewall", pl:"Prostszy interfejs do zarządzania firewallem (tu: zezwól na port 22/tcp i włącz firewall)",
       desc:"ufw allow 22/tcp jest dużo czytelniejsze niż odpowiadająca mu reguła iptables.",
       example:"sudo ufw allow 22/tcp && sudo ufw enable" },
     { cmd:"nft list ruleset", en:"nftables (list)", pl:"Wyświetl reguły nowszego systemu firewalla nftables",
@@ -781,8 +1035,9 @@ function _autoMcq(cat, item, idx) {
   const distractors = _shuffleDeterministic(otherCmds, idx).slice(0, 3);
   while (distractors.length < 3) distractors.push(correctCmd + ' --pomocnicza-opcja');
   const options = _shuffleDeterministic([correctCmd, ...distractors], idx + 7);
+  const target = _extraArgs(item.cmd, correctCmd);
   return {
-    q: `Która komenda pozwala: ${item.pl.toLowerCase()}?`,
+    q: target ? `Która komenda pozwala: ${item.pl.toLowerCase()} — cel: ${target}?` : `Która komenda pozwala: ${item.pl.toLowerCase()}?`,
     options,
     correct: options.indexOf(correctCmd),
     exp: item.desc,
@@ -790,10 +1045,35 @@ function _autoMcq(cat, item, idx) {
   };
 }
 
+function _extraArgs(baseCmd, fullCmd) {
+  // Zwraca część przykładu, która wykracza poza "rdzeń" komendy z lekcji
+  // (np. dla cmd="ls -la" i example="ls -la /etc" zwróci "/etc").
+  // Dzięki temu auto-generowane pytanie może jawnie podać cel (katalog/plik/host),
+  // zamiast zakładać, że użytkownik go zgadnie z samego opisu.
+  const baseTokens = String(baseCmd).trim().split(/\s+/).map(t => t.toLowerCase());
+  const fullTokens = String(fullCmd).trim().split(/\s+/);
+  let i = 0;
+  while (i < baseTokens.length && i < fullTokens.length && fullTokens[i].toLowerCase() === baseTokens[i]) i++;
+  if (i === 0) {
+    // Nazwa komendy się nawet nie zgadza (np. cmd="/etc/shadow" to plik, nie komenda) —
+    // pokaż sam rdzeń jako punkt odniesienia, żeby pytanie nie było niejednoznaczne.
+    return baseCmd === fullCmd ? '' : String(baseCmd).trim();
+  }
+  // Dopasowaliśmy przynajmniej nazwę komendy — ujawniamy resztę jako kontekst celu,
+  // nawet jeśli dalsze fragmenty rdzenia to placeholdery inne niż w realnym przykładzie
+  // (np. cmd="chown user:group" a przykład ma "www-data:www-data").
+  return fullTokens.slice(i).join(' ').trim();
+}
+
 function _autoType(item, withHint) {
+  const fullCmd = _firstLine(item.example);
+  const target = _extraArgs(item.cmd, fullCmd);
+  const q = target
+    ? `Wpisz komendę, która pozwala: ${item.pl.toLowerCase()} — cel: ${target}`
+    : `Wpisz komendę, która pozwala: ${item.pl.toLowerCase()}.`;
   return {
-    q: `Wpisz komendę, która pozwala: ${item.pl.toLowerCase()}.`,
-    answers: [_firstLine(item.example)],
+    q,
+    answers: [fullCmd],
     hint: withHint ? (item.cmd + ' — ' + item.en) : undefined,
     exp: item.desc,
     auto: true
