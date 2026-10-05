@@ -87,6 +87,620 @@ const CATEGORIES = [
   ]
 },
 // ============================================================
+ {
+  id: "nawigacja",
+  title: "Nawigacja w systemie Linux",
+  subtitle: "Przemieszczanie się w drzewie katalogów i orientacja w systemie plików",
+  icon: "[$]",
+  lesson: [
+    { cmd:"pwd", en:"print working directory", pl:"Wypisz bieżący katalog roboczy",
+      desc:"Wypisuje pełną (bezwzględną) ścieżkę do katalogu, w którym aktualnie się znajdujesz. Kluczowe przy pracy ze skryptami i relatywnymi ścieżkami.",
+      example:"pwd\n# /home/kali/projekty" },
+    { cmd:"cd <ścieżka>", en:"change directory", pl:"Zmień katalog roboczy",
+      desc:"Przenosi użytkownika do wskazanego katalogu. Przyjmuje ścieżki bezwzględne (zaczynające się od root '/') lub względne (względem obecnej pozycji).",
+      example:"cd /var/log/nginx" },
+    { cmd:"cd ..", en:"change directory to parent", pl:"Przejdź do katalogu nadrzędnego",
+      desc:"Dwie kropki reprezentują katalog nadrzędny (rodzica). Umożliwia szybkie cofnięcie się o jeden poziom w górę w strukturze drzewa katalogów.",
+      example:"cd ..\n# Przechodzi poziom wyżej" },
+    { cmd:"cd ~", en:"change directory to home", pl:"Przejdź do katalogu domowego użytkownika",
+      desc:"Tylda (~) to uniwersalny skrót oznaczający katalog domowy zalogowanego użytkownika (np. /home/kali). Samo wpisanie samej komendy 'cd' daje ten sam rezultat.",
+      example:"cd ~\n# Przechodzi bezpośrednio do katalogu domowego" },
+    { cmd:"cd -", en:"change directory to previous", pl:"Przejdź do poprzedniego katalogu",
+      desc:"Przełącza bieżący katalog na ten, w którym znajdowałeś się przed chwilą. Niezwykle użyteczne przy naprzemiennym pracy w dwóch odległych lokacjach.",
+      example:"cd -\n# Wracasz do ostatnio odwiedzonej ścieżki" }
+  ],
+  quiz1: [
+    { q:"Które polecenie wyświetli pełną ścieżkę bezwzględną katalogu, w którym obecnie się znajdujesz?",
+      options:["ls -la","pwd","cd ~","whoami"], correct:1,
+      exp:"pwd oznacza print working directory i zwraca aktualną ścieżkę roboczą." },
+    { q:"Jak przejść dokładnie o jeden poziom wyżej w hierarchii katalogów?",
+      options:["cd ~","cd /","cd ..","cd -"], correct:2,
+      exp:"cd .. wskazuje katalog nadrzędny (rodzica) w strukturze drzewa plików." },
+    { q:"Do czego służy polecenie 'cd -'?",
+      options:["Do przełączenia do katalogu domowego","Do usunięcia katalogu","Do powrotu do poprzedniego katalogu roboczego","Do przejścia do katalogu głównego (root)"], correct:2,
+      exp:"cd - przełącza kontekst powłoki na poprzednią lokalizację, z której wykonano skok." },
+    { q:"Co oznacza znak tildy (~) w poleceniu 'cd ~'?",
+      options:["Katalog główny systemu (root /)","Katalog domowy bieżącego użytkownika","Katalog tymczasowy (/tmp)","Katalog nadrzędny"], correct:1,
+      exp:"Tylda (~) jest skrótem systemowym wskazującym katalog domowy (home directory) aktualnego użytkownika." },
+    { q:"Która komenda, wpisana samodzielnie bez argumentów w dowolnym miejscu systemu, również przeniesie Cię do katalogu domowego?",
+      options:["pwd","cd","ls","back"], correct:1,
+      exp:"Samo polecenie 'cd' bez parametrów domyślnie kieruje użytkownika do jego katalogu domowego." }
+  ],
+  quiz2: [
+    { q:"Wpisz komendę, która wyświetli ścieżkę bieżącego katalogu roboczego.",
+      answers:["pwd"], hint:"Trzy litery: print working directory.",
+      exp:"pwd zwraca aktualną ścieżkę." },
+    { q:"Wpisz komendę, która pozwoli Ci przejść o jeden poziom katalogów wyżej.",
+      answers:["cd .."], hint:"Użyj cd oraz dwóch kropek.",
+      exp:"cd .. przenosi do katalogu nadrzędnego." },
+    { q:"Wpisz komendę, która natychmiast przeniesie Cię do Twojego katalogu domowego przy użyciu symbolu tyldy.",
+      answers:["cd ~"], hint:"Użyj cd i symbolu ~.",
+      exp:"cd ~ wskazuje katalog domowy." },
+    { q:"Wpisz komendę, która przełączy Cię z powrotem do poprzednio odwiedzanego katalogu.",
+      answers:["cd -"], hint:"Użyj cd i minusa.",
+      exp:"cd - obsługuje pamięć ostatniej lokalizacji." },
+    { q:"Wpisz komendę cd, która przeniesie Cię do absolutnej ścieżki /etc/apache2.",
+      answers:["cd /etc/apache2"], hint:"cd <ścieżka_bezwzględna>",
+      exp:"cd /etc/apache2 zmienia katalog na wskazaną ścieżkę bezwzględną." }
+  ]
+}
+// ============================================================
+   {
+  "id": "listowanie_zawartosci",
+  "title": "Listing i inspekcja zawartości",
+  "subtitle": "Zaawansowane flagi polecenia ls, widok drzewa oraz nowoczesne alternatywy (eza, lsd)",
+  "icon": "[$]",
+  "lesson": [
+    {
+      "cmd": "ls",
+      "en": "list directory contents",
+      "pl": "Wylistuj zawartość katalogu",
+      "desc": "Podstawowe polecenie wypisujące nazwy plików i katalogów w bieżącej lokalizacji w układzie jednokolumnowym lub tabelarycznym (zależnie od aliasów powłoki).",
+      example: "ls\n# dokumenty  skrypty  pobrane"
+    },
+    {
+      "cmd": "ls -l",
+      "en": "long listing format",
+      "pl": "Wylistuj w formacie długim",
+      "desc": "Wyświetla szczegółowe metadane: typ pliku i uprawnienia (np. drwxr-xr-x), liczbę dowiązań twardych, właściciela, grupę, rozmiar w bajtach oraz datę i godzinę ostatniej modyfikacji.",
+      "example": "ls -l\n# -rw-r--r-- 1 kali kali 220 sty 12 10:00 .bashrc"
+    },
+    {
+      "cmd": "ls -a",
+      "en": "all files (including hidden)",
+      "pl": "Pokaż wszystkie pliki (w tym ukryte)",
+      "desc": "Wyświetla również pliki i katalogi ukryte, których nazwy zaczynają się od kropki (np. .config, .bash_history), domyślnie pomijane przez system.",
+      "example": "ls -a\n# .  ..  .bashrc  dokumenty"
+    },
+    {
+      "cmd": "ls -h",
+      "en": "human-readable sizes",
+      "pl": "Czytelne rozmiary plików",
+      "desc": "Modyfikator rozmiaru (używany zawsze z flagą -l), który konwertuje bajty na czytelne jednostki systemowe (K dla kilobajtów, M dla megabajtów, G dla gigabajtów).",
+      "example": "ls -lh\n# -rw-r--r-- 1 kali kali 4.2M zaz 15 12:30 payload.bin"
+    },
+    {
+      "cmd": "ls -lah",
+      "en": "long, all, human-readable",
+      "pl": "Format długi, pliki ukryte i czytelne rozmiary",
+      "desc": "Kombinacja najczęściej stosowana przez administratorów i analityków bezpieczeństwa podczas szybkiej inspekcji katalogu roboczego.",
+      "example": "ls -lah /var/log"
+    },
+    {
+      "cmd": "ls -lt",
+      "en": "sort by modification time",
+      "pl": "Sortuj według czasu modyfikacji",
+      "desc": "Sortuje wyniki w formacie długim według czasu ostatniej modyfikacji, umieszczając najnowsze pliki na samej górze. Flaga -r (reverse) odwraca ten porządek.",
+      "example": "ls -lt\n# Pokazuje najświeższe logi na górze listy"
+    },
+    {
+      "cmd": "tree",
+      "en": "list contents in a tree-like format",
+      "pl": "Wyświetl strukturę katalogów w formie drzewa",
+      "desc": "Rysuje hierarchiczną, graficzną strukturę podkatalogów i plików. Przydatne przy szybkiej analizie layoutu aplikacji webowych lub struktury projektu.",
+      "example": "tree -L 2\n# Ogranicza głębokość rekurencji do 2 poziomów"
+    },
+    {
+      "cmd": "eza -la / lsd -la",
+      "en": "modern directory listing tools",
+      "pl": "Nowoczesne, kolorowe alternatywy dla ls (Rust)",
+      "desc": "Narzędzia nowej generacji (eza - następca exa, lsd) napisanego w Rust. Oferują automatyczne kodowanie kolorami wg typów plików, wsparcie dla wskaźników stanu Git oraz ładniejsze ikony.",
+      "example": "eza -lah --git\n# Wylistowanie z uwzględnieniem statusu repozytorium Git"
+    }
+  ],
+  "quiz1": [
+    {
+      "q": "Która flaga w poleceniu ls odpowiada za wyświetlenie szczegółowych informacji (uprawnienia, właściciel, rozmiar)?",
+      "options": ["-a", "-l", "-h", "-r"],
+      "correct": 1,
+      "exp": "-l oznacza 'long format' (format długi)."
+    },
+    {
+      "q": "Jakie flagi należy połączyć, aby wyświetlić pliki ukryte w formacie długim z czytelnymi dla człowieka rozmiarami (np. KB, MB)?",
+      "options": ["ls -la", "ls -lh", "ls -lah", "ls -ar"],
+      "correct": 2,
+      "exp": "-l (długi), -a (ukryte), -h (czytelne rozmiary) dają łącznie najpopularniejszą kombinację -lah."
+    },
+    {
+      "q": "Do czego służy flaga -h w poleceniu ls -lh?",
+      "options": ["Ukrywa pliki systemowe", "Wyświetla rozmiary w czytelnym formacie (Human-readable)", "Sortuje pliki alfabetycznie", "Przeszukuje podkatalogi rekurencyjnie"],
+      "correct": 1,
+      "exp": "-h zamienia surowe bajty na czytelne jednostki (K, M, G)."
+    },
+    {
+      "q": "Które polecenie wyświetli zawartość katalogu w formie graficznego drzewa?",
+      "options": ["ls -tree", "branch", "tree", "dir -graph"],
+      "correct": 2,
+      "exp": "tree to dedykowane narzędzie do wizualizacji hierarchii katalogów."
+    },
+    {
+      "q": "Jak posortować wyniki polecenia ls według czasu ostatniej modyfikacji (najnowsze pliki na górze)?",
+      "options": ["ls -ls", "ls -lt", "ls -sort", "ls -m"],
+      "correct": 1,
+      "exp": "Flaga -t włącza sortowanie po czasie modyfikacji (time)."
+    },
+    {
+      "q": "W jakim języku programowania napisanio nowoczesne, alternatywne narzędzia do listowania takie jak eza czy lsd?",
+      "options": ["Python", "C++", "Rust", "Go"],
+      "correct": 2,
+      "exp": "Zarówno eza jak i lsd są nowoczesnymi zamiennikami ls napisanymi w języku Rust."
+    }
+  ],
+  "quiz2": [
+    {
+      "q": "Wpisz standardową, łączoną komendę ls z flagami wyświetlającymi format długi, pliki ukryte oraz czytelne rozmiary.",
+      "answers": ["ls -lah", "ls -alh", "ls -l -a -h", "ls -a -l -h"],
+      "hint": "Użyj flag -l, -a oraz -h w jednym ciągu.",
+      "exp": "ls -lah łączy wszystkie trzy kluczowe modyfikatory."
+    },
+    {
+      "q": "Wpisz polecenie służące do wyświetlenia struktury plików i katalogów w formie graficznego drzewa.",
+      "answers": ["tree"],
+      "hint": "Jedno angielskie słowo oznaczające drzewo.",
+      "exp": "tree rysuje schemat hierarchiczny."
+    },
+    {
+      "q": "Wpisz komendę ls w formacie długim, posortowaną według czasu ostatniej modyfikacji.",
+      "answers": ["ls -lt", "ls -l -t"],
+      "hint": "Połącz flagę formatu długiego z flagą sortowania czasowego.",
+      "exp": "ls -lt wyświetla pliki posortowane chronologicznie."
+    },
+    {
+      "q": "Wpisz nowoczesne polecenie w stylu ls (z pakietu napisanego w Rust), aby wylistować pliki ukryte w formacie długim.",
+      "answers": ["eza -la", "lsd -la", "eza -al", "lsd -al"],
+      "hint": "Użyj alternatywnego narzędzia 'eza' lub 'lsd' z odpowiednimi flagami.",
+      "exp": "eza -la lub lsd -la realizują to zadanie z kolorowaniem."
+    }
+  ]
+}
+// ============================================================
+{
+  "id": "podglad_plikow",
+  "title": "Podgląd i inspekcja plików",
+  "subtitle": "Metody odczytu zawartości, analiza metadanych i statystyki tekstowe",
+  "icon": "[$]",
+  "lesson": [
+    {
+      "cmd": "cat <plik>",
+      "en": "concatenate and print files",
+      "pl": "Wyświetl całą zawartość pliku",
+      "desc": "Wypisuje zawartość pliku bezpośrednio na standardowe wyjście (stdout). Optymalne dla krótkich plików konfiguracyjnych; w przypadku dużych plików powoduje gwałtowne przewinięcie bufora terminala.",
+      "example": "cat /etc/passwd"
+    },
+    {
+      "cmd": "less <plik>",
+      "en": "opposite of more (paginated viewer)",
+      "pl": "Interaktywna przeglądarka stron pliku",
+      "desc": "Umożliwia wydajne przeglądanie dużych plików strona po stronie (nawigacja strzałkami, Spacja, wyjście klawiszem 'q'). Nie wczytuje całego pliku do pamięci RAM naraz.",
+      "example": "less /var/log/syslog"
+    },
+    {
+      "cmd": "bat <plik>",
+      "en": "a cat clone with wings (syntax highlighting)",
+      "pl": "Nowoczesny zamiennik cat z podświetlaniem składni",
+      "desc": "Narzędzie w języku Rust rozszerzające możliwości cat: oferuje automatyczne kolorowanie kodu (syntax highlighting), numerację linii, podział na strony oraz integrację z systemem Git.",
+      "example": "bat /etc/nginx/nginx.conf"
+    },
+    {
+      "cmd": "head -n 20 <plik>",
+      "en": "output the first part of files",
+      "pl": "Wyświetl początkowe linie pliku",
+      "desc": "Domyślnie wypisuje pierwszych 10 linii pliku. Modyfikator -n pozwala precyzyjnie zdefiniować liczbę wierszy odczytywanych od góry.",
+      "example": "head -n 20 access.log"
+    },
+    {
+      "cmd": "tail -n 10 -f <plik>",
+      "en": "output the last part / follow mode",
+      "pl": "Wyświetl końcowe linie oraz tryb śledzenia na żywo",
+      "desc": "Wypisuje końcową część pliku (domyślnie 10 linii). Flaga -f (follow) utrzymuje proces otwarty i na bieżąco strumieniuje nowe wpisy dopisywane do pliku (kluczowe przy monitorowaniu logów).",
+      "example": "tail -n 10 -f /var/log/auth.log"
+    },
+    {
+      "cmd": "file <plik>",
+      "en": "determine file type",
+      "pl": "Określ rzeczywisty typ pliku",
+      "desc": "Analizuje binarne sygnatury w nagłówku pliku (tzw. magic numbers), określając jego faktyczny format (np. skrypt ASCII, plik wykonywalny ELF, archiwum), niezależnie od rozszerzenia w nazwie.",
+      "example": "file payload.bin"
+    },
+    {
+      "cmd": "wc <plik>",
+      "en": "word, line, character, and byte count",
+      "pl": "Policz linie, słowa i bajty w pliku",
+      "desc": "Zwraca podstawowe statystyki tekstowe: liczbę wierszy (-l), słów (-w) oraz bajtów/znaków (-c). Niezwykle użyteczne w kombinacji z potokami (pipe).",
+      "example": "wc -l access.log"
+    }
+  ],
+  "quiz1": [
+    {
+      "q": "Które polecenie służy do interaktywnego przeglądania dużych plików z możliwością przewijania w górę i w dół oraz wyjściem klawiszem 'q'?",
+      "options": ["cat", "head", "less", "wc"],
+      "correct": 2,
+      "exp": "less to wydajna, paginowana przeglądarka plików."
+    },
+    {
+      "q": "Do czego służy flaga -f w poleceniu tail?",
+      "options": ["Filtruje linie zawierające błędy", "Śledzi plik na żywo i wyświetla nowe wpisy w czasie rzeczywistym", "Zmusza tail do wyświetlenia całego pliku", "Formatuje wyjście do formatu JSON"],
+      "correct": 1,
+      "exp": "Flaga -f (follow) utrzymuje proces w stanie czuwania, wypisując pojawiające się w pliku dane."
+    },
+    {
+      "q": "Jakie polecenie pozwala sprawdzić rzeczywisty format pliku na podstawie jego wewnętrznych sygnatur binarnych (magic numbers), ignorując rozszerzenie?",
+      "options": ["type", "file", "info", "stat"],
+      "correct": 1,
+      "exp": "file analizuje nagłówek pliku w celu ustalenia jego typu."
+    },
+    {
+      "q": "Które narzędzie stanowi nowoczesną alternatywę dla cat, oferując automatyczne podświetlanie składni (syntax highlighting) i numerację linii?",
+      "options": ["bat", "colorcat", "highlight", "view"],
+      "correct": 0,
+      "exp": "bat to popularne, napisane w języku Rust narzędzie do podglądu kodu i logów."
+    },
+    {
+      "q": "Która flaga polecenia wc zwraca wyłącznie liczbę linii w pliku?",
+      "options": ["-c", "-w", "-l", "-b"],
+      "correct": 2,
+      "exp": "-l oznacza 'lines' (liczba linii)."
+    }
+  ],
+  "quiz2": [
+    {
+      "q": "Wpisz komendę, która wyświetli 20 pierwszych linii pliku config.cfg.",
+      "answers": ["head -n 20 config.cfg", "head -20 config.cfg"],
+      "hint": "Użyj polecenia head z flagą -n 20.",
+      "exp": "head -n 20 pozwala określić liczbę wyświetlanych wierszy od początku pliku."
+    },
+    {
+      "q": "Wpisz polecenie do wygodnego, interaktywnego przeglądania pliku /var/log/syslog.",
+      "answers": ["less /var/log/syslog"],
+      "hint": "Czteroliterowa komenda paginacji.",
+      "exp": "less otwiera plik w czytniku tekstowym."
+    },
+    {
+      "q": "Wpisz komendę, która policzy liczbę linii w pliku access.log.",
+      "answers": ["wc -l access.log", "wc -l < access.log"],
+      "hint": "Użyj polecenia wc z odpowiednią flagą liczącą linie.",
+      "exp": "wc -l zwraca liczbę wierszy pliku."
+    },
+    {
+      "q": "Wpisz komendę, która wyświetli końcowe linie pliku auth.log i będzie na bieżąco śledzić dopisywane do niego wpisy.",
+      "answers": ["tail -f auth.log", "tail --follow auth.log"],
+      "hint": "Połącz tail z flagą -f.",
+      "exp": "tail -f uruchamia tryb śledzenia strumienia logów."
+    }
+  ]
+}
+// ============================================================
+   {
+  "id": "tworzenie_plikow_i_katalogow",
+  "title": "Tworzenie plików i katalogów",
+  "subtitle": "Inicjalizacja pustych struktur, rekurencyjne budowanie drzewa katalogów oraz przekierowanie wyjścia",
+  "icon": "[$]",
+  "lesson": [
+    {
+      "cmd": "touch <plik>",
+      "en": "change file timestamps / create empty file",
+      "pl": "Utwórz pusty plik lub zaktualizuj czas modyfikacji",
+      "desc": "Tworzy pusty plik o podanej nazwie, jeśli ten jeszcze nie istnieje. Jeśli plik już istnieje, aktualizuje jego znaczniki czasu (timestamp) ostatniego dostępu i modyfikacji.",
+      "example": "touch skrypt.sh\n# Tworzy pusty plik skryptu"
+    },
+    {
+      "cmd": "mkdir <katalog>",
+      "en": "make directory",
+      "pl": "Utwórz nowy katalog",
+      "desc": "Tworzy wskazany katalog w bieżącej lokalizacji. Zwraca błąd, jeśli katalog nadrzędny nie istnieje lub katalog o podanej nazwie już istnieje.",
+      "example": "mkdir projekty\n# Tworzy katalog 'projekty'"
+    },
+    {
+      "cmd": "mkdir -p <ścieżka>",
+      "en": "make directory recursively (parents)",
+      "pl": "Utwórz struktury katalogów rekurencyjnie",
+      "desc": "Flaga -p (parents) instruuje system, aby utworzył wszystkie brakujące katalogi pośrednie w podanej ścieżce oraz nie generował błędu, jeśli docelowy katalog już istnieje.",
+      "example": "mkdir -p /var/www/html/assets/css\n# Tworzy całe zagnieżdżone drzewo katalogów naraz"
+    },
+    {
+      "cmd": "> <plik>",
+      "en": "stdout redirection (create or truncate)",
+      "pl": "Przekierowanie wyjścia (utworzenie lub wyczyszczenie pliku)",
+      "desc": "Operator przekierowania '>' zapisuje strumień wyjściowy (stdout) do pliku. Użyty samodzielnie z pustym wyjściem, tworzy nowy pusty plik tekstowy lub całkowicie nadpisuje (czyści do 0 bajtów) istniejący plik.",
+      "example": "> config.txt\n# Tworzy nowy pusty plik lub zeruje zawartość istniejącego"
+    }
+  ],
+  "quiz1": [
+    {
+      "q": "Jaka jest podstawowa funkcja polecenia touch oprócz aktualizacji znaczników czasu?",
+      "options": ["Usuwanie plików", "Tworzenie pustego pliku", "Kopiowanie zawartości pliku", "Kompresja pliku do archiwum tar"],
+      "correct": 1,
+      "exp": "touch domyślnie tworzy nowy, pusty plik, jeśli podana nazwa jeszcze nie istnieje w systemie."
+    },
+    {
+      "q": "Jakie polecenie i flaga pozwalają utworzyć całe zagnieżdżone drzewo katalogów naraz (np. a/b/c), nawet jeśli katalogi pośrednie nie istnieją?",
+      "options": ["mkdir -r", "mkdir -p", "touch -m", "mkdirs"],
+      "correct": 1,
+      "exp": "Flaga -p (parents) w poleceniu mkdir odpowiada za rekurencyjne tworzenie brakujących katalogów pośrednich."
+    },
+    {
+      "q": "Co stanie się w przypadku wykonania polecenia '> plik.txt', jeśli plik 'plik.txt' już istnieje i zawiera ważne dane?",
+      "options": ["Dane zostaną bezpiecznie dopisane na końcu pliku", "Polecenie zwróci błąd odmowy dostępu", "Plik zostanie całkowicie nadpisany (wyczyszczony do rozmiaru 0 bajtów)", "Zawartość pliku zostanie zaszyfrowana"],
+      "correct": 2,
+      "exp": "Operator '>' przekierowuje wyjście i całkowicie nadpisuje plik od zera; do dopisywania danych służy operator '>>'."
+    },
+    {
+      "q": "Które polecenie utworzy katalog o nazwie 'bezpieczenstwo' w bieżącej lokalizacji roboczej?",
+      "options": ["touch bezpieczenstwo", "mkdir bezpieczenstwo", "create bezpieczenstwo", "dir bezpieczenstwo"],
+      "correct": 1,
+      "exp": "mkdir (make directory) to standardowe polecenie służące do tworzenia nowych katalogów w systemie Linux."
+    }
+  ],
+  "quiz2": [
+    {
+      "q": "Wpisz komendę, która utworzy pusty plik o nazwie 'payload.txt'.",
+      "answers": ["touch payload.txt"],
+      "hint": "Użyj polecenia służącego do zmiany znaczników czasu / tworzenia pustych plików.",
+      "exp": "touch payload.txt inicjalizuje pusty plik."
+    },
+    {
+      "q": "Wpisz komendę, która utworzy nowy katalog o nazwie 'skrypty'.",
+      "answers": ["mkdir skrypty"],
+      "hint": "Użyj polecenia make directory.",
+      "exp": "mkdir skrypty tworzy katalog roboczy."
+    },
+    {
+      "q": "Wpisz komendę, która rekurencyjnie utworzy zagnieżdżoną strukturę katalogów 'projekt/src/utils'.",
+      "answers": ["mkdir -p projekt/src/utils", "mkdir -p ./projekt/src/utils"],
+      "hint": "Użyj mkdir z flagą odpowiedzialną za katalogi nadrzędne (-p).",
+      "exp": "mkdir -p buduje całą podaną ścieżkę wraz z brakującymi elementami pośrednimi."
+    },
+    {
+      "q": "Wpisz symbol operatora powłoki, który służy do przekierowania strumienia wyjściowego i utworzenia lub wyczyszczenia pliku.",
+      "answers": [">"],
+      "hint": "Pojedynczy znak ostrokierunku wskazujący w prawo.",
+      "exp": "> odpowiada za przekierowanie strumienia stdout."
+    }
+  ]
+}
+// ============================================================
+       {
+  "id": "kopiowanie_i_przenoszenie",
+  "title": "Kopiowanie i przenoszenie plików",
+  "subtitle": "Zarządzanie strukturą plików (cp, mv) oraz zasady bezpieczeństwa i nadpisywania (-i, -n)",
+  "icon": "[$]",
+  "lesson": [
+    {
+      "cmd": "cp <źródło> <cel>",
+      "en": "copy files",
+      "pl": "Skopiuj plik",
+      "desc": "Tworzy kopię pliku w nowej lokalizacji. Domyślnie nadpisuje istniejący plik docelowy bez ostrzeżenia (chyba że w systemie aktywne są domyślne aliasy bezpieczeństwa).",
+      "example": "cp config.txt config.bak"
+    },
+    {
+      "cmd": "cp -r <źródło> <cel>",
+      "en": "recursive copy",
+      "pl": "Skopiuj katalog rekurencyjnie",
+      "desc": "Flaga -r (recursive) jest niezbędna podczas kopiowania całych katalogów wraz z ich zawartością, podkatalogami i uprawnieniami.",
+      "example": "cp -r /var/www/html /backup/html"
+    },
+    {
+      "cmd": "mv <źródło> <cel>",
+      "en": "move or rename files",
+      "pl": "Przenieś lub zmień nazwę pliku/katalogu",
+      "desc": "Przenosi zasób w nowe miejsce lub zmienia jego nazwę w obrębie systemu plików. Domyślnie również nadpisuje plik docelowy, jeśli taki istnieje.",
+      "example": "mv stary_plik.txt nowy_plik.txt\n# Zmiana nazwy pliku"
+    },
+    {
+      "cmd": "cp -i / mv -i",
+      "en": "interactive mode (prompt before overwrite)",
+      "pl": "Tryb interaktywny (pytaj przed nadpisaniem)",
+      "desc": "Flaga -i (interactive) wymusza wyświetlenie ostrzeżenia i pytania o zgodę (tak/nie) w przypadku próby nadpisania istniejącego pliku docelowego.",
+      "example": "cp -i plik.txt /etc/plik.txt"
+    },
+    {
+      "cmd": "cp -n / mv -n",
+      "en": "no clobber (do not overwrite)",
+      "pl": "Tryb zabezpieczenia przed nadpisaniem",
+      "desc": "Flaga -n (no clobber) całkowicie blokuje nadpisywanie istniejących plików – jeśli plik docelowy już istnieje, operacja kopiowania/przenoszenia zostanie pominięta bez błędu.",
+      "example": "cp -n raport.pdf /archiwum/"
+    },
+    {
+      "cmd": "Kiedy następuje nadpisanie pliku?",
+      "en": "overwrite conditions",
+      "pl": "Zasady i warunki nadpisywania plików",
+      "desc": "Czyste polecenia cp i mv nadpisują plik docelowy automatycznie, gdy w podanej ścieżce istnieje już plik o dokładnie takiej samej nazwie. W wielu dystrybucjach Linuksa (np. Ubuntu, Debian) pakiety systemowe lub pliki konfiguracyjne powłoki (np. ~/.bashrc) mają domyślnie ustawione aliasy w formie 'alias cp=\"cp -i\"' oraz 'alias mv=\"mv -i\"', co sprawia, że system w standardowej pracy zawsze pyta o potwierdzenie nadpisania.",
+      "example": "# Sprawdzenie aliasów w powłoce:\nalias cp"
+    }
+  ],
+  "quiz1": [
+    {
+      "q": "Która flaga w poleceniu cp jest wymagana, aby skopiować cały katalog wraz z jego zawartością?",
+      "options": ["-f", "-r", "-d", "-s"],
+      "correct": 1,
+      "exp": "-r (recursive) odpowiada za rekurencyjne kopiowanie drzewa katalogów."
+    },
+    {
+      "q": "Co robi flaga -i (interactive) dodana do polecenia cp lub mv?",
+      "options": ["Ignoruje błędy uprawnień", "Pyta użytkownika o potwierdzenie przed nadpisaniem istniejącego pliku", "Kopiuje pliki w tle", "Tworzy twarde dowiązanie"],
+      "correct": 1,
+      "exp": "-i wymusza interaktywne zapytanie przed nadpisaniem pliku docelowego."
+    },
+    {
+      "q": "Jaka jest domyślna reakcja surowego polecenia cp w przypadku, gdy plik docelowy już istnieje w katalogu?",
+      "options": ["Zwraca błąd i przerywa działanie", "Pyta użytkownika o zgodę", "Automatycznie i bezszelestnie nadpisuje plik docelowy", "Tworzy kopię z przyrostkiem .bak"],
+      "correct": 2,
+      "exp": "Standardowo cp i mv nadpisują istniejące pliki docelowe bez ostrzeżenia, o ile nie zabezpieczono tego flagą lub aliasem."
+    },
+    {
+      "q": "Która flaga oznacza tryb 'no clobber' i całkowicie zapobiega nadpisywaniu istniejących plików?",
+      "options": ["-n", "-c", "-nc", "-x"],
+      "correct": 0,
+      "exp": "-n (no clobber) uniemożliwia nadpisanie pliku docelowego."
+    }
+  ],
+  "quiz2": [
+    {
+      "q": "Wpisz komendę, która skopiuje katalog 'projekty' rekurencyjnie do katalogu '/backup/'.",
+      "answers": ["cp -r projekty /backup/", "cp -r projekty /backup"],
+      "hint": "Użyj cp z flagą rekurencyjną -r.",
+      "exp": "cp -r projekty /backup/ kopiuje całe drzewo katalogów."
+    },
+    {
+      "q": "Wpisz komendę przenoszącą plik 'dane.txt' do katalogu '/tmp/' z jawnie wymuszonym pytaniem przed nadpisaniem.",
+      "answers": ["mv -i dane.txt /tmp/", "mv --interactive dane.txt /tmp/"],
+      "hint": "Użyj mv z flagą interaktywną -i.",
+      "exp": "mv -i włącza tryb interaktywnego potwierdzenia nadpisania."
+    },
+    {
+      "q": "Wpisz flagę oznaczającą 'no clobber' (brak nadpisywania), którą można dopisać do cp lub mv.",
+      "answers": ["-n", "--no-clobber"],
+      "hint": "Jedna litera odpowiadająca za 'no'.",
+      "exp": "-n chroni przed nadpisaniem istniejących zasobów."
+    }
+  ]
+}
+// ============================================================
+       {
+  "id": "usuwanie_plikow_i_katalogow",
+  "title": "Usuwanie plików i katalogów",
+  "subtitle": "Trwałe kasowanie (rm, rmdir) oraz bezpieczne zarządzanie koszem systemowym (trash-cli, gio trash)",
+  "icon": "[$]",
+  "lesson": [
+    {
+      "cmd": "rm <plik>",
+      "en": "remove files",
+      "pl": "Trwale usuń plik",
+      "desc": "Bezpowrotnie kasuje wskazany plik z systemu plików. W surowej powłoce CLI system Linux nie posiada domyślnego kosza – usunięcie pliku za pomocą rm oznacza natychmiastowe zwolnienie bloków dyskowych.",
+      "example": "rm tajny_notatnik.txt"
+    },
+    {
+      "cmd": "rm -r <katalog>",
+      "en": "recursive remove",
+      "pl": "Usuń katalog wraz z zawartością rekurencyjnie",
+      "desc": "Flaga -r (recursive) umożliwia skasowanie całego drzewa katalogów wraz ze wszystkimi podkatalogami i plikami. Połączenie z flagą -f (-rf) wymusza operację bez pytań – najniebezpieczniejsza komenda w Linuksie przy błędnym podaniu ścieżki.",
+      "example": "rm -r stary_projekt"
+    },
+    {
+      "cmd": "rm -ri <katalog>",
+      "en": "recursive interactive remove",
+      "pl": "Interaktywne usuwanie rekurencyjne",
+      "desc": "Połączenie flagi rekurencyjnej (-r) oraz interaktywnej (-i). Zmusza system do pytania o potwierdzenie (tak/nie) przed usunięciem każdego pojedynczego pliku w strukturze, zapobiegając katastrofalnym pomyłkom.",
+      "example": "rm -ri katalog_do_przegladu"
+    },
+    {
+      "cmd": "rmdir <katalog>",
+      "en": "remove empty directory",
+      "pl": "Usuń pusty katalog",
+      "desc": "Usuwa wyłącznie katalogi, które są całkowicie puste. Jeśli w środku znajduje się chociaż jeden plik lub podkatalog, operacja zostanie zablokowana, co stanowi naturalne zabezpieczenie przed utratą danych.",
+      "example": "rmdir pusty_katalog"
+    },
+    {
+      "cmd": "gio trash / trash-put",
+      "en": "move to system trash (safe deletion)",
+      "pl": "Przenieś do kosza systemowego (bezpieczne usuwanie)",
+      "desc": "Nowoczesne alternatywy dla surowego rm. Narzędzie gio trash (część biblioteki GLib/GNOME) lub trash-put (z pakietu trash-cli) przenoszą pliki do systemowego kosza zamiast je bezpowrotnie niszczyć.",
+      "example": "trash-put dokument.pdf\ngio trash stary_plik.txt"
+    },
+    {
+      "cmd": "trash-list",
+      "en": "list trash contents",
+      "pl": "Wylistuj zawartość kosza",
+      "desc": "Wyświetla listę wszystkich obiektów znajdujących się aktualnie w koszu systemowym wraz z ich unikalnymi identyfikatorami oraz ścieżkami źródłowymi.",
+      "example": "trash-list"
+    },
+    {
+      "cmd": "trash-empty / gio trash --empty",
+      "en": "empty trash contents",
+      "pl": "Opróżnij kosz systemowy",
+      "desc": "Trwale usuwa wszystkie pliki i katalogi zgromadzone w koszu, ostatecznie zwalniając zajmowaną przez nie przestrzeń dyskową.",
+      "example": "trash-empty\ngio trash --empty"
+    }
+  ],
+  "quiz1": [
+    {
+      "q": "Czym zasadniczo różni się działanie polecenia rm od narzędzi takich jak trash-put lub gio trash?",
+      "options": [
+        "rm działa wyłącznie na plikach tekstowych",
+        "rm usuwa pliki bezpowrotnie z pominięciem kosza, a narzędzia trash przenoszą je do katalogu kosza",
+        "trash-put wymaga uprawnień administratora root",
+        "rm automatycznie archiwizuje pliki w formacie tar.gz"
+      ],
+      "correct": 1,
+      "exp": "rm niszczy dane bezpośrednio w systemie plików, podczas gdy trash-put/gio trash zabezpieczają je w koszu."
+    },
+    {
+      "q": "Co zrobi polecenie rmdir w przypadku próby usunięcia katalogu, w którym znajdują się pliki?",
+      "options": [
+        "Usunie katalog wraz z całą zawartością",
+        "Zwróci błąd i odmówi usunięcia, ponieważ katalog nie jest pusty",
+        "Przeniesie pliki do katalogu nadrzędnego",
+        "Zapyta użytkownika o zgodę na usunięcie plików"
+      ],
+      "correct": 1,
+      "exp": "rmdir projektowano z myślą o usuwaniu wyłącznie pustych katalogów."
+    },
+    {
+      "q": "Do czego służy flaga -i w kombinacji 'rm -ri'?",
+      "options": [
+        "Ignoruje pliki ukryte",
+        "Włącza tryb interaktywny, pytając o potwierdzenie przed usunięciem każdego elementu",
+        "Instaluje brakujące pakiety",
+        "Informuje system o braku uprawnień"
+      ],
+      "correct": 1,
+      "exp": "Flaga -i (interactive) wymusza potwierdzenie dla każdego pliku w procedurze rekurencyjnej."
+    },
+    {
+      "q": "Które polecenie z pakietu trash-cli pozwala wyświetlić zawartość systemowego kosza?",
+      "options": ["trash-show", "trash-list", "ls-trash", "gio trash --list"],
+      "correct": 1,
+      "exp": "trash-list to standardowe polecenie do inspekcji kosza."
+    }
+  ],
+  "quiz2": [
+    {
+      "q": "Wpisz polecenie z biblioteki GLib, które bezpiecznie przeniesie plik 'raport.log' do kosza systemowego.",
+      "answers": ["gio trash raport.log"],
+      "hint": "Użyj gio trash <plik>.",
+      "exp": "gio trash realizuje bezpieczne usuwanie."
+    },
+    {
+      "q": "Wpisz polecenie służące do usunięcia wyłącznie pustego katalogu o nazwie 'stare'.",
+      "answers": ["rmdir stare", "rmdir ./stare"],
+      "hint": "Użyj dedykowanej komendy dla pustych katalogów.",
+      "exp": "rmdir usuwa pusty katalog bez ryzyka straty danych."
+    },
+    {
+      "q": "Wpisz polecenie z pakietu trash-cli, które całkowicie opróżni kosz systemowy.",
+      "answers": ["trash-empty", "gio trash --empty"],
+      "hint": "Użyj trash-empty lub odpowiednika w gio.",
+      "exp": "trash-empty czyści zawartość kosza."
+    },
+    {
+      "q": "Wpisz polecenie rm z odpowiednimi flagami do bezwzględnego, rekurencyjnego usunięcia katalogu 'tmp_backup' bez interakcji.",
+      "answers": ["rm -rf tmp_backup", "rm -r -f tmp_backup", "rm -fr tmp_backup"],
+      "hint": "Połącz flagę rekurencyjną (-r) z wymuszającą (-f).",
+      "exp": "rm -rf wykonuje agresywne, rekurencyjne usunięcie."
+    }
+  ]
+}
+// ============================================================
 {
   id: "pliki-katalogi",
   title: "Pliki i katalogi",
