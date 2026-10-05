@@ -143,7 +143,7 @@ const CATEGORIES = [
       answers:["cd /etc/apache2"], hint:"cd <ścieżka_bezwzględna>",
       exp:"cd /etc/apache2 zmienia katalog na wskazaną ścieżkę bezwzględną." }
   ]
-}
+},
 // ============================================================
    {
   "id": "listowanie_zawartosci",
@@ -272,7 +272,7 @@ const CATEGORIES = [
       "exp": "eza -la lub lsd -la realizują to zadanie z kolorowaniem."
     }
   ]
-}
+},
 // ============================================================
 {
   "id": "podglad_plikow",
@@ -388,7 +388,7 @@ const CATEGORIES = [
       "exp": "tail -f uruchamia tryb śledzenia strumienia logów."
     }
   ]
-}
+},
 // ============================================================
    {
   "id": "tworzenie_plikow_i_katalogow",
@@ -477,7 +477,7 @@ const CATEGORIES = [
       "exp": "> odpowiada za przekierowanie strumienia stdout."
     }
   ]
-}
+},
 // ============================================================
        {
   "id": "kopiowanie_i_przenoszenie",
@@ -574,7 +574,7 @@ const CATEGORIES = [
       "exp": "-n chroni przed nadpisaniem istniejących zasobów."
     }
   ]
-}
+},
 // ============================================================
        {
   "id": "usuwanie_plikow_i_katalogow",
@@ -699,7 +699,7 @@ const CATEGORIES = [
       "exp": "rm -rf wykonuje agresywne, rekurencyjne usunięcie."
     }
   ]
-}
+},
 // ============================================================
 {
   id: "pliki-katalogi",
